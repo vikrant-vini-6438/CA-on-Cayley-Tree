@@ -3,7 +3,7 @@
 #include<vector>
 using namespace std;
 
-
+//a node structure
 struct treeNode{
     treeNode* parent = nullptr;
     treeNode* childOne = nullptr;
@@ -11,6 +11,8 @@ struct treeNode{
     int data;
 };
 typedef struct treeNode treeNode;
+
+//calculation of the total number of vertices this tree can have based on the height and order of the tree
 int noOfVertices(int height, int order){
     int result = 1;
     for(int i = 0;i<height;i++){
@@ -18,6 +20,8 @@ int noOfVertices(int height, int order){
     }
     return result;
 }
+
+
 treeNode *cayleyTree(int h, int o, int v){
     treeNode* root = new treeNode;
 
@@ -29,41 +33,33 @@ treeNode *cayleyTree(int h, int o, int v){
     root->parent->parent = root;
     root->childOne->parent = root;
     root->childTwo->parent = root;
-    v -= 4;
-    vector<treeNode*> queue{root->parent,root->childOne,root->childTwo};
-    while(v>0){
+    v -= 4; //less by 4 since 4 vertices are already created as root and its three neighbour vertices
+    vector<treeNode*> queue{root->parent,root->childOne,root->childTwo}; //use of queue for performing bfs
+    while(v>0){ //iterate till all vertices are assigned to their respective parent and children
         queue[0]->childOne = new treeNode;
         queue[0]->childOne->parent = queue[0];
         queue[0]->childTwo = new treeNode;
         queue[0]->childTwo->parent = queue[0];
         queue.push_back(queue[0]->childOne);
         queue.push_back(queue[0]->childTwo);
-        v-= 2;
-//        for(treeNode* i:queue){cout<<i->parent->childOne->data;}
+        v-= 2; //less by 2 since every time 2 vertices are being created
         queue.erase(queue.begin());
-//        for(int i = 0;i<queue.size();i++){cout<<i;}
     }
     return root;
 }
 void insertDataCayleyTree(treeNode* head, int * ar){
-    vector<treeNode*> queue;
+    vector<treeNode*> queue; // for performing bfs over tree
     queue.push_back(head);
-    int idx = 0;
-//    queue[0]->data = ar[idx++];
+    int *idx = new int;
+    *idx = 0;
     queue.push_back(queue[0]->parent);
-//    queue.push_back(queue[0]->childOne);
-//    queue.push_back(queue[0]->childTwo);
-//    queue.erase(queue.begin());
-//    while(queue.size() and idx < V){
     while(queue[0] != nullptr){
-        queue[0]->data = ar[idx++];
+        queue[0]->data = ar[(*idx)++];
         queue.push_back(queue[0]->childOne);
         queue.push_back(queue[0]->childTwo);
-//        cout<<queue.size();
         queue.erase(queue.begin());
-//        cout<<queue.size();
     }
-//    return nullptr;
+    delete idx;
 }
 
 void printCayleyTree(treeNode* head){
@@ -104,7 +100,6 @@ void deleteCayleyTree(treeNode* head){
     idx = tempo.size();
     while(idx > 0){
         temp = tempo[--idx];
-//        cout<<idx;
         delete temp;
     }
 }
@@ -114,40 +109,15 @@ int main(){
     cout<<"height:";
     cin>>height;
     int V = noOfVertices(height, order);
-//    cout<<V;
     int arr[V];
     for(int i = 0;i<V;i++){
         arr[i] = i;
     }
 
-    treeNode* CT = cayleyTree(height, order,V);
-    insertDataCayleyTree(CT, arr);
-    printCayleyTree(CT);
-//    cout<<CT->data;
-    deleteCayleyTree(CT);
-//    cout<<CT->data;
+    treeNode* CT = cayleyTree(height, order,V); //tree formation
+    insertDataCayleyTree(CT, arr); //data insertion into tree
+    printCayleyTree(CT); //printing of tree
+    deleteCayleyTree(CT); //deletion of dynamically created tree
     return 0;
 }
 
-
-
-//#include<iostream>
-//using namespace std;
-//
-//int main(){
-//    int n=4;
-//    for(int i = 0;i<n;i++){
-//        //for spaces
-//        for(int m = 0;m<n-i-1;m++){
-//            cout<<"  ";
-//        }
-//        for (int m = 1;m<=i+1;m++){
-//            cout<<m;
-//        }
-//        for(int m = i;m>=1;m--){
-//            cout<<m;
-//        }
-//        cout<<endl;
-//    }
-//    return 0;
-//}
