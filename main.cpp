@@ -54,7 +54,7 @@ treeNode *cayleyTree(int h, int o, int v)
     }
     return root;
 }
-void insertDataCayleyTree(treeNode *head, int *ar)
+void insertDataCayleyTree(treeNode *head,vector<int>ar)
 {
     vector<treeNode *> queue; // for performing bfs over tree
     queue.push_back(head);
@@ -98,30 +98,60 @@ void printCayleyTree(treeNode *head)
         cout << endl;
     }
 }
-int rule(int m, int n)
+int rule(int parent, int present)
 {
-    return (m + n) % 2;
+    return ((parent + present) % 2);
 }
-int verificationOfConfiguration(vector<int> temp,vector<vector<int>>fC)
+
+//void parentChildNeighbourhood(treeNode *head, int ar){
+	
+//}
+void makeiC(vector<int>& iC,int SIZE,treeNode* headerCt){
+	treeNode * temp = headerCt;
+	vector<treeNode*> queue;
+	iC.clear();
+	
+	//data to configuration array
+	/*here parent refers to the first child of considered root 
+	  (not a real parent of root, real parent of root doesn't exist) */
+	iC.push_back(temp->data);
+	iC.push_back(rule(temp->parent->data, temp->data));
+
+	//pushing nodes for maintaining tracing of tree
+	queue.push_back(temp->parent);
+	queue.push_back(temp->childOne);
+	queue.push_back(temp->childTwo);
+	
+	while(queue[0] != nullptr){
+		iC.push_back(rule(queue[0]->parent->data, queue[0]->data));
+		//iC.push_back(queue[0]->childOne->data;
+		//iC.push_back(queue[0]->childTwo->data;
+		queue.push_back(queue[0]->childOne);
+		queue.push_back(queue[0]->childTwo);
+		queue.erase(queue.begin());
+	}
+}
+
+//for final set of configurations 
+int verificationOfConfiguration(vector<int> temp,vector<vector<int>>& fC)
 {
     
     int j = fC.size();
     for (int i = 0; i < j; i++)
     {
 	    if(temp == fC[i]){return 0;}
-            else
-            {
-                confs.push_back(temp);
-            }
     }
+    fC.push_back(temp);
     return 1;
 }
-void CAonCT(treeNode *head, int *ar,int n)
+void CAonCT(treeNode *head, vector<int>ar,int n)
 {
-    vector<int>iC(ar, ar+n);
+    vector<int>iC(ar);
     vector<vector<int>> fC;
-    while(verificationOfConfiguration(iC, &fC)){
-    
+    while(verificationOfConfiguration(iC,fC)){
+	makeiC(iC, n, head);
+	insertDataCayleyTree(head, iC);
+	printCayleyTree(head);
     }
 }
 void deleteCayleyTree(treeNode *head)
@@ -151,12 +181,12 @@ int main()
     cout << "height:";
     cin >> height;
     int V = noOfVertices(height, order);
-    int arr[V];
+    int arr1[V];
     for (int i = 0; i < V; i++)
     {
-        arr[i] = i;
+        cin>>arr1[i];
     }
-
+    vector<int> arr(arr1, arr1+V);
     treeNode *CT = cayleyTree(height, order, V); // tree formation
     insertDataCayleyTree(CT, arr);               // data insertion into tree
     printCayleyTree(CT);                         // printing of tree
