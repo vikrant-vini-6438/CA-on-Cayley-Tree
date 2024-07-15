@@ -198,8 +198,8 @@ int main()
     vector<int> arr(arr1, arr1 + V);
     treeNode *CT = cayleyTree(height, order, V); // tree formation
     insertDataCayleyTree(CT, arr);               // data insertion into tree
-   // printCayleyTree(CT);                         // printing of tree
-//    printCT_second(CT);
+   // printCayleyTree(CT);                       // printing of tree in tabular format
+   // printCT_second(CT);                        // printign of tree in array format   
     CAonCT(CT, arr, V);                          // performing CA over Cayley Tree for m finite configurations
     deleteCayleyTree(CT);                        // deletion of dynamically created tree
     return 0;
