@@ -54,7 +54,7 @@ treeNode *cayleyTree(int h, int o, int v)
     }
     return root;
 }
-void insertDataCayleyTree(treeNode *head,vector<int>ar)
+void insertDataCayleyTree(treeNode *head, vector<int> ar)
 {
     vector<treeNode *> queue; // for performing bfs over tree
     queue.push_back(head);
@@ -79,7 +79,7 @@ void printCayleyTree(treeNode *head)
     queue.push_back(queue[0]->parent);
     while (queue[0] != nullptr)
     {
-        // for leaf nodes:
+        // for leaf nodes:V:\CA-on-Cayley-Tree
         if (queue[0]->childOne == nullptr)
         {
             cout << "leaf node: " << queue[0]->data;
@@ -98,60 +98,70 @@ void printCayleyTree(treeNode *head)
         cout << endl;
     }
 }
+void printCT_second(treeNode* head){
+    vector<treeNode *> queue;
+    queue.push_back(head);
+    queue.push_back(head->parent);
+    while (queue[0] != nullptr)
+    {
+	cout<<queue[0]->data<<' ';
+	queue.push_back(queue[0]->childOne);
+	queue.push_back(queue[0]->childTwo);
+	queue.erase(queue.begin());
+    }cout<<endl;
+}
+
 int rule(int parent, int present)
 {
     return ((parent + present) % 2);
 }
 
-//void parentChildNeighbourhood(treeNode *head, int ar){
-	
-//}
-void makeiC(vector<int>& iC,int SIZE,treeNode* headerCt){
-	treeNode * temp = headerCt;
-	vector<treeNode*> queue;
-	iC.clear();
-	
-	//data to configuration array
-	/*here parent refers to the first child of considered root 
-	  (not a real parent of root, real parent of root doesn't exist) */
-	iC.push_back(temp->data);
-	iC.push_back(rule(temp->parent->data, temp->data));
+void makeiC(vector<int> &iC, int SIZE, treeNode *headerCt)
+{
+    treeNode *temp = headerCt;
+    vector<treeNode *> queue;
+    iC.clear();
+    // data to configuration array
+    /*here parent refers to the first child of considered root
+      (not a real parent of root, real parent of root doesn't exist) */
+    iC.push_back(temp->data);
+    queue.push_back(temp->parent);
+    queue.push_back(temp->childOne);
+    queue.push_back(temp->childTwo);
 
-	//pushing nodes for maintaining tracing of tree
-	queue.push_back(temp->parent);
-	queue.push_back(temp->childOne);
-	queue.push_back(temp->childTwo);
-	
-	while(queue[0] != nullptr){
-		iC.push_back(rule(queue[0]->parent->data, queue[0]->data));
-		//iC.push_back(queue[0]->childOne->data;
-		//iC.push_back(queue[0]->childTwo->data;
-		queue.push_back(queue[0]->childOne);
-		queue.push_back(queue[0]->childTwo);
-		queue.erase(queue.begin());
-	}
+    while (queue[0] != nullptr)
+    {
+        iC.push_back(rule(queue[0]->parent->data, queue[0]->data));
+        queue.push_back(queue[0]->childOne);
+        queue.push_back(queue[0]->childTwo);
+        queue.erase(queue.begin());
+    }
 }
 
-//for final set of configurations 
-int verificationOfConfiguration(vector<int> temp,vector<vector<int>>& fC)
+//for final set of configurations
+int verificationOfConfiguration(vector<int> temp, vector<vector<int>> &fC)
 {
-    
+
     int j = fC.size();
     for (int i = 0; i < j; i++)
     {
-	    if(temp == fC[i]){return 0;}
+      if (temp == fC[i])
+        {
+            return 0;
+        }
     }
     fC.push_back(temp);
     return 1;
 }
-void CAonCT(treeNode *head, vector<int>ar,int n)
+void CAonCT(treeNode *head, vector<int> ar, int n)
 {
-    vector<int>iC(ar);
+    vector<int> iC(ar);
     vector<vector<int>> fC;
-    while(verificationOfConfiguration(iC,fC)){
-	makeiC(iC, n, head);
-	insertDataCayleyTree(head, iC);
-	printCayleyTree(head);
+    while (verificationOfConfiguration(iC, fC))
+    {
+        makeiC(iC, n, head);
+        insertDataCayleyTree(head, iC);
+        printCT_second(head);
     }
 }
 void deleteCayleyTree(treeNode *head)
@@ -173,7 +183,6 @@ void deleteCayleyTree(treeNode *head)
         temp = tempo[--idx];
         delete temp;
     }
-
 }
 int main()
 {
@@ -184,13 +193,14 @@ int main()
     int arr1[V];
     for (int i = 0; i < V; i++)
     {
-        cin>>arr1[i];
+        cin >> arr1[i];
     }
-    vector<int> arr(arr1, arr1+V);
+    vector<int> arr(arr1, arr1 + V);
     treeNode *CT = cayleyTree(height, order, V); // tree formation
     insertDataCayleyTree(CT, arr);               // data insertion into tree
-    printCayleyTree(CT);                         // printing of tree
-    CAonCT(CT,arr,V);                                  // performing CA over Cayley Tree for m finite configurations
+   // printCayleyTree(CT);                         // printing of tree
+//    printCT_second(CT);
+    CAonCT(CT, arr, V);                          // performing CA over Cayley Tree for m finite configurations
     deleteCayleyTree(CT);                        // deletion of dynamically created tree
     return 0;
 }
