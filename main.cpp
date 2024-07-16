@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <cstdlib>
+#include<ctime>
 using namespace std;
 
 // a node structure
@@ -115,23 +117,31 @@ int rule(int parent, int present)
 {
     return ((parent + present) % 2);
 }
-
-void makeiC(vector<int> &iC, int SIZE, treeNode *headerCt)
+	
+void transitionRule(int R, vector<int>& RM){
+	int idx=0;
+	while(R){
+		RM[idx++] = R%2;
+		R /= 2;
+	}
+}
+void makeiC(vector<int> &iC, int SIZE, treeNode *headerCt,vector<int>& R)
 {
     treeNode *temp = headerCt;
     vector<treeNode *> queue;
     iC.clear();
+    
     // data to configuration array
     /*here parent refers to the first child of considered root
       (not a real parent of root, real parent of root doesn't exist) */
-    iC.push_back(temp->data);
+    iC.push_back(R[0+temp->data]);//added 0 becaue root has no parent so parent value will be 0
     queue.push_back(temp->parent);
     queue.push_back(temp->childOne);
     queue.push_back(temp->childTwo);
 
     while (queue[0] != nullptr)
     {
-        iC.push_back(rule(queue[0]->parent->data, queue[0]->data));
+        iC.push_back(R[(queue[0]->parent->data)+(queue[0]->data)]);
         queue.push_back(queue[0]->childOne);
         queue.push_back(queue[0]->childTwo);
         queue.erase(queue.begin());
@@ -153,13 +163,17 @@ int verificationOfConfiguration(vector<int> temp, vector<vector<int>> &fC)
     fC.push_back(temp);
     return 1;
 }
-void CAonCT(treeNode *head, vector<int> ar, int n)
+void CAonCT(treeNode *head, vector<int> ar, int n,int R)
 {
     vector<int> iC(ar);
     vector<vector<int>> fC;
+    //cout<<"ca on ct"<<endl;
+    vector<int>RULE(4,0);
+    transitionRule(R,RULE);cout<<"RULE::";
+    for(int i:RULE){cout<<i;}cout<<endl;
     while (verificationOfConfiguration(iC, fC))
     {
-        makeiC(iC, n, head);
+        makeiC(iC, n, head,RULE);
         insertDataCayleyTree(head, iC);
         printCT_second(head);
     }
@@ -186,21 +200,26 @@ void deleteCayleyTree(treeNode *head)
 }
 int main()
 {
-    int order = 2, height;
-    cout << "height:";
+    int order = 2, height, rule;
+   // cout << "height:";
     cin >> height;
+    cin>>rule;
     int V = noOfVertices(height, order);
     int arr1[V];
-    for (int i = 0; i < V; i++)
-    {
-        cin >> arr1[i];
+   // for (int i = 0; i < V; i++)
+   // {
+    //    cin >> arr1[i];
+    //}
+    srand(time(nullptr));
+    for(int i = 0;i<V;i++){
+	    arr1[i] = rand() & 1;
     }
     vector<int> arr(arr1, arr1 + V);
     treeNode *CT = cayleyTree(height, order, V); // tree formation
     insertDataCayleyTree(CT, arr);               // data insertion into tree
-   // printCayleyTree(CT);                       // printing of tree in tabular format
-   // printCT_second(CT);                        // printign of tree in array format   
-    CAonCT(CT, arr, V);                          // performing CA over Cayley Tree for m finite configurations
+    printCayleyTree(CT);                       // printing of tree in tabular format
+    printCT_second(CT);                        // printign of tree in array format   
+    CAonCT(CT, arr, V,rule);                          // performing CA over Cayley Tree for m finite configurations
     deleteCayleyTree(CT);                        // deletion of dynamically created tree
     return 0;
 }
