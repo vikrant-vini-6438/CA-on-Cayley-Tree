@@ -26,7 +26,7 @@ long int noOfVertices(int height, int order)
     return result;
 }
 
-treeNode *cayleyTree(int h, int o,long int v)
+treeNode *cayleyTree(int h, int o, long int v)
 {
     treeNode *root = new treeNode;
 
@@ -133,7 +133,7 @@ int idx(int n, int p)
 {
     return ((n * 2) + (p * 1));
 }
-void makeiC(vector<long int> &iC,long int SIZE, treeNode *headerCt, vector<long int> &R)
+void makeiC(vector<long int> &iC, long int SIZE, treeNode *headerCt, vector<long int> &R)
 {
     treeNode *temp = headerCt;
     vector<treeNode *> queue;
@@ -173,7 +173,7 @@ int verificationOfConfiguration(vector<long int> temp, vector<vector<long int>> 
     // cout << "returning 1" << endl;
     return 1;
 }
-void CAonCT(treeNode *head, vector<long int> ar,long int n,long int R)
+void CAonCT(treeNode *head, vector<long int> ar, long int n, long int R)
 {
     vector<long int> iC(ar);
     vector<vector<long int>> fC;
@@ -186,6 +186,9 @@ void CAonCT(treeNode *head, vector<long int> ar,long int n,long int R)
         insertDataCayleyTree(head, iC);
         if (verificationOfConfiguration(iC, fC) == 0)
         {
+            cout << "\nfinal config: " << endl;
+
+            printCT_second(head);
             break;
         }
         printCT_second(head);
@@ -215,16 +218,11 @@ void deleteCayleyTree(treeNode *head)
 int main()
 {
     int order = 2, height, rule;
-    // cout << "height:";
     cin >> height;
     cin >> rule;
     long int V = noOfVertices(height, order);
-    cout<<V<<endl;
+    cout << V << endl;
     long int arr1[V];
-    // for (int i = 0; i < V; i++)
-    // {
-    //    cin >> arr1[i];
-    //}
     srand(time(nullptr));
     for (long int i = 0; i < V; i++)
     {
@@ -233,9 +231,12 @@ int main()
     vector<long int> arr(arr1, arr1 + V);
     treeNode *CT = cayleyTree(height, order, V); // tree formation
     insertDataCayleyTree(CT, arr);               // data insertion into tree
-    //printCayleyTree(CT);                         // printing of tree in tabular format
-    printCT_second(CT);                          // printign of tree in array format
-    CAonCT(CT, arr, V, rule);                    // performing CA over Cayley Tree for m finite configurations
-    deleteCayleyTree(CT);                        // deletion of dynamically created tree
+// printCayleyTree(CT);                         // printing of tree in tabular format
+    cout << "initial config:\n";
+    printCT_second(CT); // printign of tree in array format
+    cout << endl;
+    cout << "intermediate configs:\n";
+    CAonCT(CT, arr, V, rule); // performing CA over Cayley Tree for m finite configurations
+    deleteCayleyTree(CT);     // deletion of dynamically created tree
     return 0;
 }
