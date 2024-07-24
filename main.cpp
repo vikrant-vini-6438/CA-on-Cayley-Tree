@@ -242,40 +242,35 @@ void makeTable(vector<vector<int>>& Table, treeNode* CT, vector<long int>arr,lon
         Table[rule][1] = avg/10;
         Table[rule][2] = max;
     } 
-}
+}V:\CA-on-Cayley-Tree
 */
 void makeiCN4(vector<long int>& ic, treeNode* header,vector<long int> rule){
-	cout<<"makeiCn4"<<endl;
 	ic.clear();
 	vector<treeNode* > queue;
-	int m = idxN4(header->data, header->parent->data, header->childOne->data, header->childTwo->data);
-	cout<<m<<endl;
 	ic.push_back(rule[idxN4(header->data, header->parent->data, header->childOne->data, header->childTwo->data)]);
 	queue.push_back(header->parent);
 	queue.push_back(header->childOne);
 	queue.push_back(header->childTwo);
 	while(queue[0] != nullptr){
-		ic.push_back(rule[idxN4(queue[0]->data, queue[0]->parent->data, queue[0]->childOne->data, queue[0]->childTwo->data)]);
+		if(queue[0] -> childOne == nullptr){	ic.push_back(rule[idxN4(queue[0]->data, queue[0]->parent->data, 0,0)]);
+		}
+		else{
+		ic.push_back(rule[idxN4(queue[0]->data, queue[0]->parent->data, queue[0]->childOne->data, queue[0]->childTwo->data)]);}
 		queue.push_back(queue[0]->childOne);
 		queue.push_back(queue[0]->childTwo);
+		queue.erase(queue.begin());
 	}
-	cout<<"makeic n4"<<endl;
 }
 void CA_at_n_equals_4(treeNode* head,int rule,vector<long int> arr){
 	vector<long int> RM(16, 0);
 	transitionRule(rule, RM);
-	for(long int m : RM){cout<<m;}
 	vector<long int> iC(arr);
-	cout<<endl;
-	for(long int m: iC){cout<<m;}
 	vector<vector<long int>> fC;
 	while ( verificationOfConfiguration(iC, fC)){
 		makeiCN4(iC, head, RM);
 		insertDataCayleyTree(head,iC);
 		printCTSecond(head);
 	}
-
-	
 }	
 int main()
 {
