@@ -81,10 +81,10 @@ void printCayleyTree(treeNode *head)
     queue.push_back(queue[0]->parent);
     while (queue[0] != nullptr)
     {
-        // for leaf nodes:V:\CA-on-Cayley-Tree
+        // for leaf nodes:
         if (queue[0]->childOne == nullptr)
         {
-            cout << "leaf node: " << queue[0]->data;
+            cout << "leaf node: "<< queue[0]->data;
         }
         // for internal nodes
         else
@@ -100,7 +100,7 @@ void printCayleyTree(treeNode *head)
         cout << endl;
     }
 }
-void printCT_second(treeNode *head)
+void printCTSecond(treeNode *head)
 {
     vector<treeNode *> queue;
     queue.push_back(head);
@@ -114,12 +114,12 @@ void printCT_second(treeNode *head)
     }
     cout << endl;
 }
-
+/*
 int rule(int parent, int present)
 {
     return ((parent + present) % 2);
 }
-
+*/
 void transitionRule(int R, vector<long int> &RM)
 {
     int idx = 0;
@@ -129,23 +129,29 @@ void transitionRule(int R, vector<long int> &RM)
         R /= 2;
     }
 }
+/*
 int idx(int n, int p)
 {
     return ((n * 2) + (p * 1));
 }
-void makeiC(vector<long int> &iC, long int SIZE, treeNode *headerCt, vector<long int> &R)
+*/
+
+int idxN4(int self, int p, int c1, int c2){
+	return (self*8 + p*4 + (c1+c1) + c2); //self x 2^3 + p x 2^2 + c1 x 2^1 + c2 x 2^0
+}
+/*
+void makeiC(vector<long int> &iC, treeNode *headerCt, vector<long int> &R)
 {
-    treeNode *temp = headerCt;
     vector<treeNode *> queue;
     iC.clear();
 
     // data to configuration array
-    /*here parent refers to the first child of considered root
-      (not a real parent of root, real parent of root doesn't exist) */
-    iC.push_back(R[idx(temp->data, 0)]); // added 0 becaue root has no parent so parent value will be 0
-    queue.push_back(temp->parent);
-    queue.push_back(temp->childOne);
-    queue.push_back(temp->childTwo);
+   //here parent refers to the first child of considered root
+     // (not a real parent of root, real parent of root doesn't exist) 
+    iC.push_back(R[idx(headerCt->data, 0)]); // added 0 becaue root has no parent so parent value will be 0
+    queue.push_back(headerCt->parent);
+    queue.push_back(headerCt->childOne);
+    queue.push_back(headerCt->childTwo);
 
     while (queue[0] != nullptr)
     {
@@ -155,7 +161,7 @@ void makeiC(vector<long int> &iC, long int SIZE, treeNode *headerCt, vector<long
         queue.erase(queue.begin());
     }
 }
-
+*/
 // for final set of configurations
 int verificationOfConfiguration(vector<long int> temp, vector<vector<long int>> &fC)
 {
@@ -165,14 +171,15 @@ int verificationOfConfiguration(vector<long int> temp, vector<vector<long int>> 
     {
         if (temp == fC[i])
         {
-            // cout << "returning 0" << endl;
+             cout << "returning 0" << endl;
             return 0;
         }
     }
     fC.push_back(temp);
-    // cout << "returning 1" << endl;
+     cout << "returning 1" << endl;
     return 1;
 }
+/*
 int CAonCT(treeNode *head, vector<long int> ar, long int n, long int R)
 {
     vector<long int> iC(ar);
@@ -182,19 +189,20 @@ int CAonCT(treeNode *head, vector<long int> ar, long int n, long int R)
     int configHeight = 0;
     while (1)
     {
-        makeiC(iC, n, head, RULE);
+        makeiC(iC, head, RULE);
         insertDataCayleyTree(head, iC);
         if (verificationOfConfiguration(iC, fC) == 0)
         {
 		
-		configHeight++;
+		//configHeight++;
             break;
         }
         configHeight++;
-        // printCT_second(head);
+        // printCTSecond(head);
     }
     return configHeight;
 }
+*/
 void deleteCayleyTree(treeNode *head)
 {
     vector<treeNode *> tempo;
@@ -215,6 +223,7 @@ void deleteCayleyTree(treeNode *head)
         delete temp;
     }
 }
+/*
 void makeTable(vector<vector<int>>& Table, treeNode* CT, vector<long int>arr,long int V)
 {
  for (int rule = 0; rule < 16; rule++)
@@ -234,6 +243,40 @@ void makeTable(vector<vector<int>>& Table, treeNode* CT, vector<long int>arr,lon
         Table[rule][2] = max;
     } 
 }
+*/
+void makeiCN4(vector<long int>& ic, treeNode* header,vector<long int> rule){
+	cout<<"makeiCn4"<<endl;
+	ic.clear();
+	vector<treeNode* > queue;
+	int m = idxN4(header->data, header->parent->data, header->childOne->data, header->childTwo->data);
+	cout<<m<<endl;
+	ic.push_back(rule[idxN4(header->data, header->parent->data, header->childOne->data, header->childTwo->data)]);
+	queue.push_back(header->parent);
+	queue.push_back(header->childOne);
+	queue.push_back(header->childTwo);
+	while(queue[0] != nullptr){
+		ic.push_back(rule[idxN4(queue[0]->data, queue[0]->parent->data, queue[0]->childOne->data, queue[0]->childTwo->data)]);
+		queue.push_back(queue[0]->childOne);
+		queue.push_back(queue[0]->childTwo);
+	}
+	cout<<"makeic n4"<<endl;
+}
+void CA_at_n_equals_4(treeNode* head,int rule,vector<long int> arr){
+	vector<long int> RM(16, 0);
+	transitionRule(rule, RM);
+	for(long int m : RM){cout<<m;}
+	vector<long int> iC(arr);
+	cout<<endl;
+	for(long int m: iC){cout<<m;}
+	vector<vector<long int>> fC;
+	while ( verificationOfConfiguration(iC, fC)){
+		makeiCN4(iC, head, RM);
+		insertDataCayleyTree(head,iC);
+		printCTSecond(head);
+	}
+
+	
+}	
 int main()
 {
     int order = 2, height;
@@ -249,10 +292,10 @@ int main()
     }
     vector<long int> arr(arr1, arr1 + V);
     treeNode *CT = cayleyTree(height, order, V); // tree formation
-    insertDataCayleyTree(CT, arr);               // data insertion into tree
+    insertDataCayleyTree(CT, arr);               // data insertion into treeV:\CA-on-Cayley-Tree
                                                  // printCayleyTree(CT);                         // printing of tree in tabular format
     cout << "initial config:\n";
-    printCT_second(CT); // printign of tree in array format
+    printCTSecond(CT); // printign of tree in array format
     cout << endl;
     vector<vector<int>> T(16,vector<int>(3));
     // for (int rule = 0; rule < 16; rule++)
@@ -269,22 +312,25 @@ int main()
     //     }
     //     T[rule][0] = 1;
     //     T[rule][1] = avg/10;
-    //     T[rule][2] = max;
+    //  V:\CA-on-Cayley-Tree   T[rule][2] = max;
     // } // performing CA over Cayley Tree for m finite configurations
    int rule;cin>>rule;
 
-    CAonCT(CT,arr, V, rule);
-    makeTable(T, CT, arr, V);
-    cout << "RULE\t" << "minH\t" << "avgH\t" << "maxH\n";
-    for (int i = 0; i < 16; i++)
-    {
+   // CAonCT(CT,arr, V, rule);
+   // makeTable(T, CT, arr, V);
+   // cout << "RULE\t" << "minH\t" << "avgH\t" << "maxH\n";
+  //  for (int i = 0; i < 16; i++)
+  /*  {
         cout << i << '\t';
         for (int j = 0; j < 3; j++)
         {
             cout << T[i][j] << '\t';
         }
         cout << endl;
-    }
+    }*/
+    cout<<"\nca ct n 4:"<<endl;
+    CA_at_n_equals_4(CT,rule,arr);
+   // makeTable(T, CT, arr, V);
     deleteCayleyTree(CT); // deletion of dynamically created tree
     return 0;
 }
