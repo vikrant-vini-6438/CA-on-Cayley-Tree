@@ -334,7 +334,7 @@ int main()
     //  for (int i = 0; i < 16; i++)
     /*  {
           cout << i << '\t';
-          for (int j = 0; j < 3; j++)
+          for (int j = 0; j < 3; j++)V:\CA-on-Cayley-Tree
           {
               cout << T[i][j] << '\t';
           }
