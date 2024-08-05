@@ -1,15 +1,9 @@
 #include<iostream>
 #include "cayley_tree.h"
+#include<cmath>
 using namespace std;
 
-// a node structure
-struct treeNode
-{
-    treeNode *parent = nullptr;
-    treeNode *childOne = nullptr;
-    treeNode *childTwo = nullptr;
-    int data;
-};
+
 typedef struct treeNode treeNode;
 
 // calculation of the total number of vertices this tree can have based on the height and order of the tree
@@ -23,6 +17,7 @@ long int noOfVertices(int height, int order)
     return result;
 }
 
+//creation of Cayley Tree dynamically @ each node with dynamic memory allocation 
 treeNode *cayleyTree(int h, int o, long int v)
 {
     treeNode *root = new treeNode;
@@ -53,6 +48,8 @@ treeNode *cayleyTree(int h, int o, long int v)
     }
     return root;
 }
+
+//insertion of data into Cayley Tree 
 void insertDataCayleyTree(treeNode *head, vector<long int> ar)
 {
     vector<treeNode *> queue; // for performing bfs over tree
@@ -70,6 +67,7 @@ void insertDataCayleyTree(treeNode *head, vector<long int> ar)
     delete idx;
 }
 
+//Cayley Tree printing as tabular view which one belong to which node in any form either parent or child
 void printCayleyTree(treeNode *head)
 {
     cout << "present-node | parent | child-one | child-two" << endl;
@@ -97,6 +95,8 @@ void printCayleyTree(treeNode *head)
         cout << endl;
     }
 }
+
+//printing of Cayley Tree as an array
 void printCTArr(treeNode *head)
 {
     vector<treeNode *> queue;
@@ -111,6 +111,8 @@ void printCTArr(treeNode *head)
     }
     cout << endl;
 }
+
+//deletion of dynamically created Cayley Tree
 void deleteCayleyTree(treeNode *head)
 {
     vector<treeNode *> tempo;
