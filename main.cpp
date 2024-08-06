@@ -46,15 +46,15 @@ void makeiC(vector<long int> &iC, treeNode *headerCt, vector<long int> &R)
    //here parent refers to the first child of considered root
      // (not a real parent of root, real parent of root doesn't exist)
     iC.push_back(R[idx(headerCt->data, 0)]); // added 0 becaue root has no parent so parent value will be 0
-    queue.push_back(headerCt->parent);
-    queue.push_back(headerCt->childOne);
-    queue.push_back(headerCt->childTwo);
+    queue.push_back(headerCt->neighborOne);
+    queue.push_back(headerCt->neighborTwo);
+    queue.push_back(headerCt->neighborThree);
 
     while (queue[0] != nullptr)
     {
-        iC.push_back(R[idx(queue[0]->data, queue[0]->parent->data)]);
-        queue.push_back(queue[0]->childOne);
-        queue.push_back(queue[0]->childTwo);
+        iC.push_back(R[idx(queue[0]->data, queue[0]->neighborOne->data)]);
+        queue.push_back(queue[0]->neighborTwo);
+        queue.push_back(queue[0]->neighborThree);
         queue.erase(queue.begin());
     }
 }
@@ -64,22 +64,22 @@ void makeiCN4(vector<long int> &ic, treeNode *header, vector<long int> rule)
 {
     ic.clear();
     vector<treeNode *> queue;
-    ic.push_back(rule[idxN4(header->data, header->parent->data, header->childOne->data, header->childTwo->data)]);
-    queue.push_back(header->parent);
-    queue.push_back(header->childOne);
-    queue.push_back(header->childTwo);
+    ic.push_back(rule[idxN4(header->data, header->neighborOne->data, header->neighborTwo->data, header->neighborThree->data)]);
+    queue.push_back(header->neighborOne);
+    queue.push_back(header->neighborTwo);
+    queue.push_back(header->neighborThree);
     while (queue[0] != nullptr)
     {
-        if (queue[0]->childOne == nullptr)
+        if (queue[0]->neighborTwo == nullptr)
         {
-            ic.push_back(rule[idxN4(queue[0]->data, queue[0]->parent->data, 0, 0)]);
+            ic.push_back(rule[idxN4(queue[0]->data, queue[0]->neighborOne->data, 0, 0)]);
         }
         else
         {
-            ic.push_back(rule[idxN4(queue[0]->data, queue[0]->parent->data, queue[0]->childOne->data, queue[0]->childTwo->data)]);
+            ic.push_back(rule[idxN4(queue[0]->data, queue[0]->neighborOne->data, queue[0]->neighborTwo->data, queue[0]->neighborThree->data)]);
         }
-        queue.push_back(queue[0]->childOne);
-        queue.push_back(queue[0]->childTwo);
+        queue.push_back(queue[0]->neighborTwo);
+        queue.push_back(queue[0]->neighborThree);
         queue.erase(queue.begin());
     }
 }
