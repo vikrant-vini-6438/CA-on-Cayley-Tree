@@ -70,7 +70,7 @@ void insertDataCayleyTree(treeNode *head, vector<long int> ar)
 //Cayley Tree printing as tabular view which one belong to which node in any form either parent or child
 void printCayleyTree(treeNode *head)
 {
-    cout << "present-node | parent | child-one | child-two" << endl;
+    cout << "present-node | N-1 | N-2 | N-3" << endl;
     vector<treeNode *> queue;
     queue.push_back(head);
     queue.push_back(queue[0]->neighborOne);
