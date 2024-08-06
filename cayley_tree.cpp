@@ -27,22 +27,22 @@ treeNode *cayleyTree(int h, int o, long int v)
         return root;
     }
 
-    root->parent = new treeNode;
-    root->childOne = new treeNode;
-    root->childTwo = new treeNode;
-    root->parent->parent = root;
-    root->childOne->parent = root;
-    root->childTwo->parent = root;
+    root->neighborOne = new treeNode;
+    root->neighborTwo = new treeNode;
+    root->neighborThree = new treeNode;
+    root->neighborOne->neighborOne = root;
+    root->neighborTwo->neighborOne = root;
+    root->neighborThree->neighborOne = root;
     v -= 4;                                                                 // less by 4 since 4 vertices are already created as root and its three neighbour vertices
-    vector<treeNode *> queue{root->parent, root->childOne, root->childTwo}; // use of queue for performing bfs
+    vector<treeNode *> queue{root->neighborOne, root->neighborTwo, root->neighborThree}; // use of queue for performing bfs
     while (v > 0)
     { // iterate till all vertices are assigned to their respective parent and children
-        queue[0]->childOne = new treeNode;
-        queue[0]->childOne->parent = queue[0];
-        queue[0]->childTwo = new treeNode;
-        queue[0]->childTwo->parent = queue[0];
-        queue.push_back(queue[0]->childOne);
-        queue.push_back(queue[0]->childTwo);
+        queue[0]->neighborTwo = new treeNode;
+        queue[0]->neighborTwo->neighborOne = queue[0];
+        queue[0]->neighborThree = new treeNode;
+        queue[0]->neighborThree->neighborOne = queue[0];
+        queue.push_back(queue[0]->neighborTwo);
+        queue.push_back(queue[0]->neighborThree);
         v -= 2; // less by 2 since every time 2 vertices are being created
         queue.erase(queue.begin());
     }
@@ -56,12 +56,12 @@ void insertDataCayleyTree(treeNode *head, vector<long int> ar)
     queue.push_back(head);
     long int *idx = new long int;
     *idx = 0;
-    queue.push_back(queue[0]->parent);
+    queue.push_back(queue[0]->neighborOne);
     while (queue[0] != nullptr)
     {
         queue[0]->data = ar[(*idx)++];
-        queue.push_back(queue[0]->childOne);
-        queue.push_back(queue[0]->childTwo);
+        queue.push_back(queue[0]->neighborTwo);
+        queue.push_back(queue[0]->neighborThree);
         queue.erase(queue.begin());
     }
     delete idx;
@@ -73,11 +73,11 @@ void printCayleyTree(treeNode *head)
     cout << "present-node | parent | child-one | child-two" << endl;
     vector<treeNode *> queue;
     queue.push_back(head);
-    queue.push_back(queue[0]->parent);
+    queue.push_back(queue[0]->neighborOne);
     while (queue[0] != nullptr)
     {
         // for leaf nodes:
-        if (queue[0]->childOne == nullptr)
+        if (queue[0]->neighborTwo == nullptr)
         {
             cout << "leaf node: " << queue[0]->data;
         }
@@ -85,12 +85,12 @@ void printCayleyTree(treeNode *head)
         else
         {
             cout << queue[0]->data << "\t\t";
-            cout << queue[0]->parent->data << "\t\t";
-            cout << queue[0]->childOne->data << "\t\t";
-            cout << queue[0]->childTwo->data << "\t\t";
+            cout << queue[0]->neighborOne->data << "\t\t";
+            cout << queue[0]->neighborTwo->data << "\t\t";
+            cout << queue[0]->neighborThree->data << "\t\t";
         }
-        queue.push_back(queue[0]->childOne);
-        queue.push_back(queue[0]->childTwo);
+        queue.push_back(queue[0]->neighborTwo);
+        queue.push_back(queue[0]->neighborThree);
         queue.erase(queue.begin());
         cout << endl;
     }
@@ -101,12 +101,12 @@ void printCTArr(treeNode *head)
 {
     vector<treeNode *> queue;
     queue.push_back(head);
-    queue.push_back(head->parent);
+    queue.push_back(head->neighborOne);
     while (queue[0] != nullptr)
     {
         cout << queue[0]->data << ' ';
-        queue.push_back(queue[0]->childOne);
-        queue.push_back(queue[0]->childTwo);
+        queue.push_back(queue[0]->neighborTwo);
+        queue.push_back(queue[0]->neighborThree);
         queue.erase(queue.begin());
     }
     cout << endl;
@@ -118,12 +118,12 @@ void deleteCayleyTree(treeNode *head)
     vector<treeNode *> tempo;
     treeNode *temp = head;
     tempo.push_back(head);
-    tempo.push_back(head->parent);
+    tempo.push_back(head->neighborOne);
     long int idx = 0;
-    while (temp->childOne != nullptr)
+    while (temp->neighborTwo != nullptr)
     {
-        tempo.push_back(temp->childOne);
-        tempo.push_back(temp->childTwo);
+        tempo.push_back(temp->neighborTwo);
+        tempo.push_back(temp->neighborThree);
         temp = tempo[++idx];
     }
     idx = tempo.size();

@@ -6,9 +6,9 @@
 #define __cayley_tree_h
 
 struct treeNode{
-	treeNode* parent = nullptr;
-	treeNode* childOne = nullptr;
-	treeNode* childTwo = nullptr;
+	treeNode* neighborOne = nullptr;
+	treeNode* neighborTwo = nullptr;
+	treeNode* neighborThree = nullptr;
 	int data = 0;
 };
 long int noOfVertices(int height, int order);
