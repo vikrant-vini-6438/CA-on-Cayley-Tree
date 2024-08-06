@@ -26,12 +26,17 @@ void transitionRule(int R, vector<long int> &RM)
         R /= 2;
     }
 }
-
+//for n = 2
+int idx(int n, int p)
+{
+	return ((n * 2) + (p * 1));
+}
+//for n = 4
 int idxN4(int self, int p, int c1, int c2)
 {
     return (self * 8 + p * 4 + (c1 + c1) + c2); // self x 2^3 + p x 2^2 + c1 x 2^1 + c2 x 2^0
 }
-
+//for n = 2
 void makeiC(vector<long int> &iC, treeNode *headerCt, vector<long int> &R)
 {
     vector<treeNode *> queue;
@@ -54,84 +59,7 @@ void makeiC(vector<long int> &iC, treeNode *headerCt, vector<long int> &R)
     }
 }
 
-// for final set of configurations
-int verificationOfConfiguration(vector<long int> temp, vector<vector<long int>> &fC)
-{
-
-    int j = fC.size();
-    for (long i = 0; i < j; i++)
-    {
-        if (temp == fC[i])
-        {
-            return 0;
-        }
-    }
-    fC.push_back(temp);
-    return 1;
-}
-
-int CAonCT(treeNode *head, vector<long int> ar, long int n, long int R)
-{
-    vector<long int> iC(ar);
-    vector<vector<long int>> fC;
-    vector<long int> RULE(4, 0);
-    transitionRule(R, RULE);
-    int configHeight = 0;
-    while (1)
-    {
-        makeiC(iC, head, RULE);
-        insertDataCayleyTree(head, iC);
-        if (verificationOfConfiguration(iC, fC) == 0)
-        {
-            break;
-        }
-        configHeight++;
-        // printCTSecond(head);
-    }
-    return configHeight;
-}
-
-void deleteCayleyTree(treeNode *head)
-{
-    vector<treeNode *> tempo;
-    treeNode *temp = head;
-    tempo.push_back(head);
-    tempo.push_back(head->parent);
-    long int idx = 0;
-    while (temp->childOne != nullptr)
-    {
-        tempo.push_back(temp->childOne);
-        tempo.push_back(temp->childTwo);
-        temp = tempo[++idx];
-    }
-    idx = tempo.size();
-    while (idx > 0)
-    {
-        temp = tempo[--idx];
-        delete temp;
-    }
-}
-
-void makeTable(vector<vector<int>>& Table, treeNode* CT, vector<long int>arr,long int V)
-{
- for (int rule = 0; rule < 16; rule++)
-    {	int max = 1, avg = 1, res = 0;
-        for (int j = 0; j < 10; j++)
-        {
-            res = CAonCT(CT, arr, V, rule);
-            if (max < res)
-            {
-                max = res;
-            }
-        avg = (avg+res);
-
-        }
-        Table[rule][0] = 1;
-        Table[rule][1] = avg/10;
-        Table[rule][2] = max;
-    }
-}
-
+//for n = 4
 void makeiCN4(vector<long int> &ic, treeNode *header, vector<long int> rule)
 {
     ic.clear();
@@ -155,6 +83,66 @@ void makeiCN4(vector<long int> &ic, treeNode *header, vector<long int> rule)
         queue.erase(queue.begin());
     }
 }
+
+// for final set of configurations
+int verificationOfConfiguration(vector<long int> temp, vector<vector<long int>> &fC)
+{
+
+    int j = fC.size();
+    for (long i = 0; i < j; i++)
+    {
+        if (temp == fC[i])
+        {
+            return 0;
+        }
+    }
+    fC.push_back(temp);
+    return 1;
+}
+//execution of CA @ n = 2
+int CAonCT(treeNode *head, vector<long int> ar, long int R)
+{
+    vector<long int> iC(ar);
+    vector<vector<long int>> fC;
+    vector<long int> RULE(4, 0);
+    transitionRule(R, RULE);
+    int configHeight = 0;
+    while (1)
+    {
+        makeiC(iC, head, RULE);
+        insertDataCayleyTree(head, iC);
+        if (verificationOfConfiguration(iC, fC) == 0)
+        {
+            break;
+        }
+        configHeight++;
+        // printCTSecond(head);
+    }
+    return configHeight;
+}
+
+//tabular analysis of CA 
+void makeTable(vector<vector<int>>& Table, treeNode* CT, vector<long int>arr,long int V)
+{
+ for (int rule = 0; rule < 16; rule++)
+    {	int max = 1, avg = 1, res = 0;
+        for (int j = 0; j < 10; j++)
+        {
+            res = CAonCT(CT, arr, rule);
+            if (max < res)
+            {
+                max = res;
+            }
+        avg = (avg+res);
+
+        }
+        Table[rule][0] = 1;
+        Table[rule][1] = avg/10;
+        Table[rule][2] = max;
+    }
+}
+
+//execution of CA @ n = 4
 void CA_at_n_equals_4(treeNode *head, int rule, vector<long int> arr)
 {
     vector<long int> RM(16, 0);
@@ -179,7 +167,6 @@ int main()
 {
     int order = 2, height;
     cin >> height;
-    // cin >> rule;
     long int V = noOfVertices(height, order);
     cout << V << endl;
     long int arr1[V];
@@ -195,6 +182,9 @@ int main()
     printCTArr(CT); // printign of tree in array format
     cout << endl;
     vector<vector<int>> T(16, vector<int>(3));
+   // int rr;cout<<"rule for n = 2: ";cin>>rr;
+   // CAonCT(CT, arr,rr);
+
     int rule;
     cin >> rule;
     cout << "\nca ct n 4:" << endl;
