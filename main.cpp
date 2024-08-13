@@ -17,6 +17,12 @@ int rule(int parent, int present)
     return ((parent + present) % 2);
 }
 */
+void makexx(int *arr, int m){
+	for(int i = 0;i<4;i++){
+		arr[i] = (m&1);
+		m >>= 1;
+	}
+}
 void transitionRule(int R, vector<long int> &RM)
 {
     int idx = 0;
@@ -25,6 +31,16 @@ void transitionRule(int R, vector<long int> &RM)
         RM[idx++] = R % 2;
         R /= 2;
     }
+    
+    for(int i = 0;i<idx;i++){
+	    int* arr = new int[4]{0}; 
+	    if(RM[i] == 1){
+		makexx(arr, i);	
+		}
+
+	    }
+	    delete [] arr;
+    }
 }
 //for n = 2
 int idx(int n, int p)
@@ -32,9 +48,9 @@ int idx(int n, int p)
 	return ((n * 2) + (p * 1));
 }
 //for n = 4
-int idxN4(int self, int p, int c1, int c2)
+int idxN4(int self, int p, int N1, int N2)
 {
-    return (self * 8 + p * 4 + (c1 + c1) + c2); // self x 2^3 + p x 2^2 + c1 x 2^1 + c2 x 2^0
+    return (self * 8 + p * 4 + (N1 + N1) + N2); // self x 2^3 + p x 2^2 + N1 x 2^1 + N2 x 2^0
 }
 //for n = 2
 void makeiC(vector<long int> &iC, treeNode *headerCt, vector<long int> &R)
@@ -177,9 +193,9 @@ int main()
     }
     vector<long int> arr(arr1, arr1 + V);
     treeNode *CT = cayleyTree(height, order, V); // tree formation
-    insertDataCayleyTree(CT, arr);               // data insertion into treeV:\CA-on-Cayley-Tree
+    insertDataCayleyTree(CT, arr);               // data insertion into tree
     cout << "initial config:\n";
-    printCTArr(CT); // printign of tree in array format
+    printCTArr(CT); // printing of tree in array format
     cout << endl;
     vector<vector<int>> T(16, vector<int>(3));
    // int rr;cout<<"rule for n = 2: ";cin>>rr;

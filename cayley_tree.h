@@ -9,7 +9,7 @@ struct treeNode{
 	treeNode* neighborOne = nullptr;
 	treeNode* neighborTwo = nullptr;
 	treeNode* neighborThree = nullptr;
-	int data = 0;
+	int data = -1;
 };
 long int noOfVertices(int height, int order);
 treeNode* cayleyTree(int h, int o, long int v);
