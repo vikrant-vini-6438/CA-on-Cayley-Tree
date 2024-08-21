@@ -30,25 +30,36 @@ int idxN4(int self, int p, int N1, int N2)
 
 void shiftTransitionRule(vector<long int>&arr){
 	int temp = 0;
-	int tempArr[] = {0,0,0,0};
-	int counter = -1, idx = 0;
+	int tempArr[4];
+	int counter = -1, idx,counterr = -1;
 	
 	while(++counter < 16)
 	{
 		if(arr[counter] == 1){
+			//cout<<"\ncounter: "<<counter<<endl;
 			counterr = counter;
+			idx = 0;
+			tempArr[0]=0,tempArr[1]=0,tempArr[2]=0,tempArr[3]=0;
 			while(counterr){
 				tempArr[idx++] = (counterr&1);
 				counterr >>= 1;
 			}
-			for(int i = 0;i<3;i++)//its already known that only three rotations will be done
+			//cout<<endl;
+			//for (int i = 0;i<4;i++) cout<<"arr ele: "<<tempArr[i]<<endl;
+			for(int i = 0;i<3;i++)//its already known the number of rotations
 			{
 				arr[idxN4(tempArr[3], tempArr[2], tempArr[1], tempArr[0])] = 1;
+
 				temp = tempArr[0];
 				tempArr[0] = tempArr[1];
 				tempArr[1] = tempArr[2];
 				tempArr[2] = temp;	
+			//for(int i = 0;i<4;i++){cout<<"\nchecking in loop: "<<tempArr[i];}
+			//cout<<endl;
 			}
+			//cout<<endl;
+			//for(int i = 0;i<4;i++){cout<<"\nchecking: "<<tempArr[i];}
+				//cout<<endl;
 		}
 	}
 }
@@ -60,8 +71,12 @@ void transitionRule(int R, vector<long int> &RM)
         RM[idx++] = R % 2;
         R /= 2;
     }
+    cout<<"RULE: ";
+    for(long int ele :RM){cout<<ele<<' ';}
     shiftTransitionRule(RM);
-
+    	cout<<"\nafter shifting: ";
+	for(long int ele: RM){cout<<ele<<' ';}
+	cout<<endl;
 }
 
 //for n = 2
@@ -206,7 +221,7 @@ int main()
     vector<long int> arr(arr1, arr1 + V);
     treeNode *CT = cayleyTree(height, order, V); // tree formation
     insertDataCayleyTree(CT, arr);               // data insertion into tree
-    cout << "initial config:\n";
+    cout << "initial config(conf-1):\n";
     printCTArr(CT); // printing of tree in array format
     cout << endl;
     vector<vector<int>> T(16, vector<int>(3));
@@ -215,7 +230,7 @@ int main()
 
     int rule;
     cin >> rule;
-    cout << "\nca ct n 4:" << endl;
+    cout << "\nca ct n 4: " << endl;
     CA_at_n_equals_4(CT, rule, arr);
     // makeTable(T, CT, arr, V);
     deleteCayleyTree(CT); // deletion of dynamically created tree
