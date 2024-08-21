@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdlib>
 #include <ctime>
-#include "cayley_tree.h"
+#include "./cayley_tree.h"
 
 using namespace std;
 
@@ -17,31 +17,6 @@ int rule(int parent, int present)
     return ((parent + present) % 2);
 }
 */
-void makexx(int *arr, int m){
-	for(int i = 0;i<4;i++){
-		arr[i] = (m&1);
-		m >>= 1;
-	}
-}
-void transitionRule(int R, vector<long int> &RM)
-{
-    int idx = 0;
-    while (R)
-    {
-        RM[idx++] = R % 2;
-        R /= 2;
-    }
-    
-    for(int i = 0;i<idx;i++){
-	    int* arr = new int[4]{0}; 
-	    if(RM[i] == 1){
-		makexx(arr, i);	
-		}
-
-	    }
-	    delete [] arr;
-    }
-}
 //for n = 2
 int idx(int n, int p)
 {
@@ -52,6 +27,43 @@ int idxN4(int self, int p, int N1, int N2)
 {
     return (self * 8 + p * 4 + (N1 + N1) + N2); // self x 2^3 + p x 2^2 + N1 x 2^1 + N2 x 2^0
 }
+
+void shiftTransitionRule(vector<long int>&arr){
+	int temp = 0;
+	int tempArr[] = {0,0,0,0};
+	int counter = -1, idx = 0;
+	
+	while(++counter < 16)
+	{
+		if(arr[counter] == 1){
+			counterr = counter;
+			while(counterr){
+				tempArr[idx++] = (counterr&1);
+				counterr >>= 1;
+			}
+			for(int i = 0;i<3;i++)//its already known that only three rotations will be done
+			{
+				arr[idxN4(tempArr[3], tempArr[2], tempArr[1], tempArr[0])] = 1;
+				temp = tempArr[0];
+				tempArr[0] = tempArr[1];
+				tempArr[1] = tempArr[2];
+				tempArr[2] = temp;	
+			}
+		}
+	}
+}
+void transitionRule(int R, vector<long int> &RM)
+{
+    int idx = 0;
+    while (R)
+    {
+        RM[idx++] = R % 2;
+        R /= 2;
+    }
+    shiftTransitionRule(RM);
+
+}
+
 //for n = 2
 void makeiC(vector<long int> &iC, treeNode *headerCt, vector<long int> &R)
 {
