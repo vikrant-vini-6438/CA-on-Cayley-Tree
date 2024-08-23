@@ -18,6 +18,15 @@ int rule(int parent, int present)
 }
 */
 //for n = 2
+void to_binary(vector<long int>&ar,int M){
+
+	int idx = 0;
+	while (M)
+	{
+		ar[idx++] = (M&1);
+		M >>= 1;
+	}
+}
 int idx(int n, int p)
 {
 	return ((n * 2) + (p * 1));
@@ -27,7 +36,18 @@ int idxN4(int self, int p, int N1, int N2)
 {
     return (self * 8 + p * 4 + (N1 + N1) + N2); // self x 2^3 + p x 2^2 + N1 x 2^1 + N2 x 2^0
 }
-
+int idxR(int self, int neighborOne, int neighborTwo, int neighborThree){
+	int *arr = new int[3]{neighborOne, neighborTwo, neighborThree};
+	int *count = new int(0);
+	for(int i = 0;i<3;i++){
+		if (arr[i] == 1) (*count)++;
+	}
+	vector<long int> tempV{0, 0};
+	to_binary(tempV, count);
+	delete count;	
+	delete [] arr;
+	return (self * 4 + tempV[1] * 2 + tempV[0] * 1);
+}
 void shiftTransitionRule(vector<long int>&arr){
 	int temp = 0;
 	int tempArr[4];
@@ -63,18 +83,14 @@ void shiftTransitionRule(vector<long int>&arr){
 		}
 	}
 }
+
 void transitionRule(int R, vector<long int> &RM)
 {
-    int idx = 0;
-    while (R)
-    {
-        RM[idx++] = R % 2;
-        R /= 2;
-    }
-    cout<<"RULE: ";
-    for(long int ele :RM){cout<<ele<<' ';}
-    shiftTransitionRule(RM);
-    	cout<<"\nafter shifting: ";
+	to_binary(RM, R);
+	cout<<"RULE: ";
+	for(long int ele :RM){cout<<ele<<' ';}
+	shiftTransitionRule(RM);
+	cout<<"\nafter shifting: ";
 	for(long int ele: RM){cout<<ele<<' ';}
 	cout<<endl;
 }
@@ -206,33 +222,41 @@ void CA_at_n_equals_4(treeNode *head, int rule, vector<long int> arr)
        printCTArr(head);
     }
 }
+//reduced means the symmetry is introduced and state transition of self is independent of the position of neighbors 
+void CAonCTreduced(long int vertices, int rule, ){
+	
+
+}
+
 int main()
 {
     int order = 2, height;
     cin >> height;
     long int V = noOfVertices(height, order);
     cout << V << endl;
-    long int arr1[V];
-    srand(time(nullptr));
-    for (long int i = 0; i < V; i++)
-    {
-        arr1[i] = rand() & 1;
-    }
-    vector<long int> arr(arr1, arr1 + V);
+   // long int arr1[V];
+   // srand(time(nullptr));
+   // for (long int i = 0; i < V; i++)
+    //{
+     //   arr1[i] = rand() & 1;
+   // }
+    //vector<long int> arr(arr1, arr1 + V);
+
     treeNode *CT = cayleyTree(height, order, V); // tree formation
     insertDataCayleyTree(CT, arr);               // data insertion into tree
-    cout << "initial config(conf-1):\n";
-    printCTArr(CT); // printing of tree in array format
-    cout << endl;
-    vector<vector<int>> T(16, vector<int>(3));
+   // cout << "initial config(conf-1):\n";
+  //  printCTArr(CT); // printing of tree in array format
+   // cout << endl;
+   // vector<vector<int>> T(16, vector<int>(3));
    // int rr;cout<<"rule for n = 2: ";cin>>rr;
    // CAonCT(CT, arr,rr);
 
     int rule;
     cin >> rule;
-    cout << "\nca ct n 4: " << endl;
-    CA_at_n_equals_4(CT, rule, arr);
+   // cout << "\nca ct n 4: " << endl;
+   // CA_at_n_equals_4(CT, rule, arr);
     // makeTable(T, CT, arr, V);
+    CAonCT_reduced_rules(
     deleteCayleyTree(CT); // deletion of dynamically created tree
     return 0;
 }
