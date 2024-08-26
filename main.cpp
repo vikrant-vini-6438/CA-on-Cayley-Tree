@@ -51,7 +51,7 @@ int idxR(int self, int neighborOne, int neighborTwo, int neighborThree){
 	}
 	vector<long int> tempV{0, 0};
 	to_binary(tempV, *count);
-	delete count;	
+	delete count;
 	delete [] arr;
 	return (self * 4 + tempV[1] * 2 + tempV[0] * 1);
 }
@@ -272,10 +272,12 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 	int totalIdx = pow(2, 10);
 	vector<vector<long int>> confs(totalIdx);
 	vector<long int> tempV(vertices,0);
-	
-	vector<long int> RULE;
+//cout<<"rule is being created"<<endl;	
+	vector<long int> RULE(8,0);
+//cout<<"ruleis created"<<endl;
 	to_binary(RULE, rule);
-	vector<vector<long int>fCr;
+//cout<<"rule is filled in "<<endl;
+	vector<vector<long int>>fCr;
 	for(int i = 0;i<totalIdx;i++){
 		to_binary(tempV, i);
 		confs[i] = tempV;
@@ -283,13 +285,13 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 	}
 	for(vector<long int> tt: confs){
 		vector<long int>iCr(tt);
+//cout<<"ic created"<<endl;
 		cout<<toDeci(iCr, vertices)<<"->";
 		while(verificationOfConfigurationReduced(iCr, fCr)){
 			insertDataCayleyTree(tree, iCr);
 			makeiCR(iCr, tree, RULE);
 			cout<<toDeci(iCr, vertices)<<"->";
 		}
-		cout<<toDeci(iCr, vertices);
 		cout<<endl;
 		fCr.clear();
 	}
