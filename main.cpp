@@ -27,6 +27,13 @@ void to_binary(vector<long int>&ar,int M){
 		M >>= 1;
 	}
 }
+int toDeci(vector<long int> T,long int v){
+	int val = 0;
+	for(int i = 0; i< v; i++){
+		val += pow(2,i) * T[i];
+	}
+	return val;
+}
 int idx(int n, int p)
 {
 	return ((n * 2) + (p * 1));
@@ -37,13 +44,13 @@ int idxN4(int self, int p, int N1, int N2)
     return (self * 8 + p * 4 + (N1 + N1) + N2); // self x 2^3 + p x 2^2 + N1 x 2^1 + N2 x 2^0
 }
 int idxR(int self, int neighborOne, int neighborTwo, int neighborThree){
-	int *arr = new int[3]{neighborOne, neighborTwo, neighborThree};
+	int *arr= new int[3]{neighborOne, neighborTwo, neighborThree};
 	int *count = new int(0);
 	for(int i = 0;i<3;i++){
 		if (arr[i] == 1) (*count)++;
 	}
 	vector<long int> tempV{0, 0};
-	to_binary(tempV, count);
+	to_binary(tempV, *count);
 	delete count;	
 	delete [] arr;
 	return (self * 4 + tempV[1] * 2 + tempV[0] * 1);
@@ -215,18 +222,80 @@ void CA_at_n_equals_4(treeNode *head, int rule, vector<long int> arr)
         makeiCN4(iC, head, RM);
         if (!verificationOfConfiguration(iC, fC))
         {
-            break;
+          break;
         }
         insertDataCayleyTree(head, iC);
        cout << "conf-" << ++count << ':';
        printCTArr(head);
     }
 }
-//reduced means the symmetry is introduced and state transition of self is independent of the position of neighbors 
-void CAonCTreduced(long int vertices, int rule, ){
-	
 
+void makeiCR(vector<long int> &ic, treeNode *header, vector<long int> rule)
+{
+    ic.clear();
+    vector<treeNode *> queue;
+    ic.push_back(rule[idxR(header->data, header->neighborOne->data, header->neighborTwo->data, header->neighborThree->data)]);
+    queue.push_back(header->neighborOne);
+    queue.push_back(header->neighborTwo);
+    queue.push_back(header->neighborThree);
+    while (queue[0] != nullptr)
+    {
+        if (queue[0]->neighborTwo == nullptr)
+        {
+            ic.push_back(rule[idxR(queue[0]->data, queue[0]->neighborOne->data, 0, 0)]);
+        }
+        else
+        {
+            ic.push_back(rule[idxR(queue[0]->data, queue[0]->neighborOne->data, queue[0]->neighborTwo->data, queue[0]->neighborThree->data)]);
+        }
+        queue.push_back(queue[0]->neighborTwo);
+        queue.push_back(queue[0]->neighborThree);
+        queue.erase(queue.begin());
+    }
 }
+int verificationOfConfigurationReduced(vector<long int> temp, vector<vector<long int>> &fC)
+{
+
+    int j = fC.size();
+    for (long i = 0; i < j; i++)
+    {
+        if (temp == fC[i])
+        {
+            return 0;
+        }
+    }
+    fC.push_back(temp);
+    return 1;
+}
+//reduced means the symmetry is introduced and state transition of self is independent of the position of neighbors 
+void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
+	int totalIdx = pow(2, 10);
+	vector<vector<long int>> confs(totalIdx);
+	vector<long int> tempV(vertices,0);
+	
+	vector<long int> RULE;
+	to_binary(RULE, rule);
+	vector<vector<long int>fCr;
+	for(int i = 0;i<totalIdx;i++){
+		to_binary(tempV, i);
+		confs[i] = tempV;
+		fill(tempV.begin(), tempV.end(), 0); 
+	}
+	for(vector<long int> tt: confs){
+		vector<long int>iCr(tt);
+		cout<<toDeci(iCr, vertices)<<"->";
+		while(verificationOfConfigurationReduced(iCr, fCr)){
+			insertDataCayleyTree(tree, iCr);
+			makeiCR(iCr, tree, RULE);
+			cout<<toDeci(iCr, vertices)<<"->";
+		}
+		cout<<toDeci(iCr, vertices);
+		cout<<endl;
+		fCr.clear();
+	}
+}	
+
+
 
 int main()
 {
@@ -243,7 +312,7 @@ int main()
     //vector<long int> arr(arr1, arr1 + V);
 
     treeNode *CT = cayleyTree(height, order, V); // tree formation
-    insertDataCayleyTree(CT, arr);               // data insertion into tree
+   // insertDataCayleyTree(CT, arr);               // data insertion into tree
    // cout << "initial config(conf-1):\n";
   //  printCTArr(CT); // printing of tree in array format
    // cout << endl;
@@ -256,7 +325,7 @@ int main()
    // cout << "\nca ct n 4: " << endl;
    // CA_at_n_equals_4(CT, rule, arr);
     // makeTable(T, CT, arr, V);
-    CAonCT_reduced_rules(
+    CAonCT_reduced_rules(V, rule, CT);
     deleteCayleyTree(CT); // deletion of dynamically created tree
     return 0;
 }
