@@ -18,7 +18,7 @@ int rule(int parent, int present)
 }
 */
 //for n = 2
-void to_binary(vector<long int>&ar,int M){
+void to_binary(vector<long int>&ar,long int M){
 
 	int idx = 0;
 	while (M)
@@ -27,9 +27,9 @@ void to_binary(vector<long int>&ar,int M){
 		M >>= 1;
 	}
 }
-int toDeci(vector<long int> T,long int v){
-	int val = 0;
-	for(int i = 0; i< v; i++){
+long int toDeci(vector<long int> T,long int v){
+	long int val = 0;
+	for(long int i = 0; i< v; i++){
 		val += pow(2,i) * T[i];
 	}
 	return val;
@@ -43,9 +43,9 @@ int idxN4(int self, int p, int N1, int N2)
 {
     return (self * 8 + p * 4 + (N1 + N1) + N2); // self x 2^3 + p x 2^2 + N1 x 2^1 + N2 x 2^0
 }
-int idxR(int self, int neighborOne, int neighborTwo, int neighborThree){
+long int idxR(int self, int neighborOne, int neighborTwo, int neighborThree){
 	int *arr= new int[3]{neighborOne, neighborTwo, neighborThree};
-	int *count = new int(0);
+	long int *count = new long int(0);
 	for(int i = 0;i<3;i++){
 		if (arr[i] == 1) (*count)++;
 	}
@@ -53,7 +53,8 @@ int idxR(int self, int neighborOne, int neighborTwo, int neighborThree){
 	to_binary(tempV, *count);
 	delete count;
 	delete [] arr;
-	return (self * 4 + tempV[1] * 2 + tempV[0] * 1);
+	return (tempV[1] * 4 + self * 2 + tempV[0] * 1);
+//	return (self * 4 + tempV[1] * 2 + tempV[0] * 1);
 }
 void shiftTransitionRule(vector<long int>&arr){
 	int temp = 0;
@@ -230,7 +231,7 @@ void CA_at_n_equals_4(treeNode *head, int rule, vector<long int> arr)
     }
 }
 
-void makeiCR(vector<long int> &ic, treeNode *header, vector<long int> rule)
+void makeiCR(vector<long int> &ic, treeNode *header, vector<long int> rule,vector<long int>& F,long int V)
 {
     ic.clear();
     vector<treeNode *> queue;
@@ -252,10 +253,11 @@ void makeiCR(vector<long int> &ic, treeNode *header, vector<long int> rule)
         queue.push_back(queue[0]->neighborThree);
         queue.erase(queue.begin());
     }
+	F[toDeci(ic, V)]=1;
 }
 int verificationOfConfigurationReduced(vector<long int> temp, vector<vector<long int>> &fC)
 {
-
+					
     int j = fC.size();
     for (long i = 0; i < j; i++)
     {
@@ -269,7 +271,7 @@ int verificationOfConfigurationReduced(vector<long int> temp, vector<vector<long
 }
 //reduced means the symmetry is introduced and state transition of self is independent of the position of neighbors 
 void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
-	int totalIdx = pow(2, 10);
+	int totalIdx = pow(2, vertices);
 	vector<vector<long int>> confs(totalIdx);
 	vector<long int> tempV(vertices,0);
 //cout<<"rule is being created"<<endl;	
@@ -278,6 +280,7 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 	to_binary(RULE, rule);
 //cout<<"rule is filled in "<<endl;
 	vector<vector<long int>>fCr;
+	vector<long int> flag(totalIdx,0);
 	for(int i = 0;i<totalIdx;i++){
 		to_binary(tempV, i);
 		confs[i] = tempV;
@@ -285,11 +288,13 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 	}
 	for(vector<long int> tt: confs){
 		vector<long int>iCr(tt);
+		long int idR = toDeci(iCr, vertices);
+		if(flag[idR] != 0) continue; 
 //cout<<"ic created"<<endl;
-		cout<<toDeci(iCr, vertices)<<"->";
+		cout<<idR<<"->";
 		while(verificationOfConfigurationReduced(iCr, fCr)){
 			insertDataCayleyTree(tree, iCr);
-			makeiCR(iCr, tree, RULE);
+			makeiCR(iCr, tree, RULE,flag,vertices);
 			cout<<toDeci(iCr, vertices)<<"->";
 		}
 		cout<<endl;
