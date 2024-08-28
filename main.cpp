@@ -18,7 +18,7 @@ int rule(int parent, int present)
 }
 */
 //for n = 2
-void to_binary(vector<long int>&ar,long int M){
+void to_binary(vector<long int>&ar,int M){
 
 	int idx = 0;
 	while (M)
@@ -27,9 +27,9 @@ void to_binary(vector<long int>&ar,long int M){
 		M >>= 1;
 	}
 }
-long int toDeci(vector<long int> T,long int v){
-	long int val = 0;
-	for(long int i = 0; i< v; i++){
+int toDeci(vector<long int> T,long int v){
+	int val = 0;
+	for(int i = 0; i< v; i++){
 		val += pow(2,i) * T[i];
 	}
 	return val;
@@ -43,9 +43,9 @@ int idxN4(int self, int p, int N1, int N2)
 {
     return (self * 8 + p * 4 + (N1 + N1) + N2); // self x 2^3 + p x 2^2 + N1 x 2^1 + N2 x 2^0
 }
-long int idxR(int self, int neighborOne, int neighborTwo, int neighborThree){
+int idxR(int self, int neighborOne, int neighborTwo, int neighborThree){
 	int *arr= new int[3]{neighborOne, neighborTwo, neighborThree};
-	long int *count = new long int(0);
+	int *count = new int(0);
 	for(int i = 0;i<3;i++){
 		if (arr[i] == 1) (*count)++;
 	}
@@ -53,7 +53,7 @@ long int idxR(int self, int neighborOne, int neighborTwo, int neighborThree){
 	to_binary(tempV, *count);
 	delete count;
 	delete [] arr;
-	return (tempV[1] * 4 + self * 2 + tempV[0] * 1);
+	return (tempV[0] * 4 + self * 2 + tempV[1] * 1);
 //	return (self * 4 + tempV[1] * 2 + tempV[0] * 1);
 }
 void shiftTransitionRule(vector<long int>&arr){
@@ -230,10 +230,10 @@ void CA_at_n_equals_4(treeNode *head, int rule, vector<long int> arr)
        printCTArr(head);
     }
 }
-
+//making an configuration for the implementation of transition rule, this configuration is derived form the tree
 void makeiCR(vector<long int> &ic, treeNode *header, vector<long int> rule,vector<long int>& F,long int V)
 {
-    ic.clear();
+    ic.clear();//if there is/may be any already derived configuration then clear 
     vector<treeNode *> queue;
     ic.push_back(rule[idxR(header->data, header->neighborOne->data, header->neighborTwo->data, header->neighborThree->data)]);
     queue.push_back(header->neighborOne);
@@ -255,51 +255,54 @@ void makeiCR(vector<long int> &ic, treeNode *header, vector<long int> rule,vecto
     }
 	F[toDeci(ic, V)]=1;
 }
-int verificationOfConfigurationReduced(vector<long int> temp, vector<vector<long int>> &fC)
+
+//verification if there is any configuration repeating itself
+int verificationOfConfigurationReduced(vector<long int> temp, vector<vector<long int>> &fC,long int *tempC,long int n)
 {
 					
     int j = fC.size();
     for (long i = 0; i < j; i++)
     {
-        if (temp == fC[i])
-        {
-            return 0;
+        if (temp == fC[i]) //comparision with list of already created configurations
+        {	*tempC = toDeci(temp, n);
+            return 0; //if such repeating configuration is found to be there in the list
         }
     }
-    fC.push_back(temp);
-    return 1;
+    fC.push_back(temp);//adding dissimilar configuration to the list
+    return 1;//no match found
 }
 //reduced means the symmetry is introduced and state transition of self is independent of the position of neighbors 
 void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
-	int totalIdx = pow(2, vertices);
-	vector<vector<long int>> confs(totalIdx);
+	int totalIdx = pow(2, vertices); //how much configurations should be there for consideration of transition rule
+	vector<vector<long int>> confs(totalIdx); //original matrix of configurations which contains a empty list which is further updated with its binary values related to each of its index 
 	vector<long int> tempV(vertices,0);
-//cout<<"rule is being created"<<endl;	
-	vector<long int> RULE(8,0);
-//cout<<"ruleis created"<<endl;
+	vector<long int> RULE(8,0);//rule matrix :: 8-bit binary form of RULE 
 	to_binary(RULE, rule);
-//cout<<"rule is filled in "<<endl;
-	vector<vector<long int>>fCr;
+	vector<vector<long int>>fCr; //checking for cycle of similar configurations after applying transition rule everytime 
 	vector<long int> flag(totalIdx,0);
 	for(int i = 0;i<totalIdx;i++){
 		to_binary(tempV, i);
-		confs[i] = tempV;
-		fill(tempV.begin(), tempV.end(), 0); 
+		confs[i] = tempV; //assigning each index of conf with a totalIdx-bit binary form of its index 
+		fill(tempV.begin(), tempV.end(), 0); //resetting temporary vector again to its default values '0'
 	}
+//	vector<int> reversibleRule(totalIdx);//vector for checking if reversiblity of rule occurs :: if at any point of time after iteration any off bit is found to be there in this list then rule is said to be as not reversible
+	long int *tempRev = new long int;
 	for(vector<long int> tt: confs){
 		vector<long int>iCr(tt);
 		long int idR = toDeci(iCr, vertices);
 		if(flag[idR] != 0) continue; 
-//cout<<"ic created"<<endl;
-		cout<<idR<<"->";
-		while(verificationOfConfigurationReduced(iCr, fCr)){
+	//	cout<<idR<<"->";
+		while(verificationOfConfigurationReduced(iCr, fCr,tempRev,vertices)){
 			insertDataCayleyTree(tree, iCr);
 			makeiCR(iCr, tree, RULE,flag,vertices);
-			cout<<toDeci(iCr, vertices)<<"->";
+		//	cout<<toDeci(iCr, vertices)<<"->";
 		}
-		cout<<endl;
+		if(idR != *tempRev) {cout<<'\n'<<rule<<" :: non reversible"<<endl;return;}
+	//	cout<<endl;
 		fCr.clear();
 	}
+	cout<<'\n'<<rule<<" :: reversible"<<endl;
+	return;
 }	
 
 
@@ -327,12 +330,17 @@ int main()
    // int rr;cout<<"rule for n = 2: ";cin>>rr;
    // CAonCT(CT, arr,rr);
 
-    int rule;
-    cin >> rule;
+    int* RULE=new int[256];
+//    cin >> rule;
+	
    // cout << "\nca ct n 4: " << endl;
    // CA_at_n_equals_4(CT, rule, arr);
     // makeTable(T, CT, arr, V);
-    CAonCT_reduced_rules(V, rule, CT);
-    deleteCayleyTree(CT); // deletion of dynamically created tree
-    return 0;
+	for(int rule = 0;rule<256;rule++){
+		CAonCT_reduced_rules(V, rule, CT);
+	}
+
+	deleteCayleyTree(CT);
+	delete [] RULE;
+
 }
