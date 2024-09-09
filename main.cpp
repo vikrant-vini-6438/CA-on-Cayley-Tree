@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <ctime>
 #include "./cayley_tree.h"
-
+#include <fstream>
 using namespace std;
 
 // a node structure
@@ -127,11 +127,13 @@ void makeiC(vector<long int> &iC, treeNode *headerCt, vector<long int> &R)
 }
 
 //for n = 4
-void makeiCN4(vector<long int> &ic, treeNode *header, vector<long int> rule)
+void makeiCN4(vector<long int> &ic, treeNode *header, vector<long int> rule,vector<long int>& F,long int V)
 {
     ic.clear();
     vector<treeNode *> queue;
-    ic.push_back(rule[idxN4(header->data, header->neighborOne->data, header->neighborTwo->data, header->neighborThree->data)]);
+   ic.push_back(rule[idxN4(header->data, header->neighborOne->data, header->neighborTwo->data, header->neighborThree->data)]);
+
+//    ic.push_back(rule[idxN4(header->neighborOne->data, header->data, header->neighborTwo->data, header->neighborThree->data)]);
     queue.push_back(header->neighborOne);
     queue.push_back(header->neighborTwo);
     queue.push_back(header->neighborThree);
@@ -139,16 +141,22 @@ void makeiCN4(vector<long int> &ic, treeNode *header, vector<long int> rule)
     {
         if (queue[0]->neighborTwo == nullptr)
         {
-            ic.push_back(rule[idxN4(queue[0]->data, queue[0]->neighborOne->data, 0, 0)]);
+
+            ic.push_back(rule[idxN4( queue[0]->data,queue[0]->neighborOne->data, 0, 0)]);
+           // ic.push_back(rule[idxN4( queue[0]->neighborOne->data,queue[0]->data, 0, 0)]);
         }
         else
         {
-            ic.push_back(rule[idxN4(queue[0]->data, queue[0]->neighborOne->data, queue[0]->neighborTwo->data, queue[0]->neighborThree->data)]);
+            ic.push_back(rule[idxN4(queue[0]->data,queue[0]->neighborOne->data,queue[0]->neighborTwo->data, queue[0]->neighborThree->data)]);
+		
+           // ic.push_back(rule[idxN4(queue[0]->neighborOne->data,queue[0]->data,queue[0]->neighborTwo->data, queue[0]->neighborThree->data)]);
         }
         queue.push_back(queue[0]->neighborTwo);
         queue.push_back(queue[0]->neighborThree);
         queue.erase(queue.begin());
     }
+
+	F[toDeci(ic, V)]=1;
 }
 
 // for final set of configurations
@@ -159,7 +167,7 @@ int verificationOfConfiguration(vector<long int> temp, vector<vector<long int>> 
     for (long i = 0; i < j; i++)
     {
         if (temp == fC[i])
-        {
+        {	
             return 0;
         }
     }
@@ -208,7 +216,7 @@ void makeTable(vector<vector<int>>& Table, treeNode* CT, vector<long int>arr,lon
         Table[rule][2] = max;
     }
 }
-
+/*
 //execution of CA @ n = 4
 void CA_at_n_equals_4(treeNode *head, int rule, vector<long int> arr)
 {
@@ -226,10 +234,10 @@ void CA_at_n_equals_4(treeNode *head, int rule, vector<long int> arr)
           break;
         }
         insertDataCayleyTree(head, iC);
-       cout << "conf-" << ++count << ':';
-       printCTArr(head);
+      // cout << "conf-" << ++count << ':';
+      // printCTArr(head);
     }
-}
+}*/
 //making an configuration for the implementation of transition rule, this configuration is derived form the tree
 void makeiCR(vector<long int> &ic, treeNode *header, vector<long int> rule,vector<long int>& F,long int V)
 {
@@ -273,10 +281,14 @@ int verificationOfConfigurationReduced(vector<long int> temp, vector<vector<long
 }
 //reduced means the symmetry is introduced and state transition of self is independent of the position of neighbors 
 void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
+	ofstream outFile;
+	outFile.open("output.txt",ios::app);
 	int totalIdx = pow(2, vertices); //how much configurations should be there for consideration of transition rule
 	vector<vector<long int>> confs(totalIdx); //original matrix of configurations which contains a empty list which is further updated with its binary values related to each of its index 
 	vector<long int> tempV(vertices,0);
-	vector<long int> RULE(8,0);//rule matrix :: 8-bit binary form of RULE 
+//	vector<long int> RULE(8,0);//rule matrix :: 8-bit binary form of RULE 
+
+	vector<long int> RULE(16,0);//rule matrix :: 16-bit binary form of RULE 
 	to_binary(RULE, rule);
 	vector<vector<long int>>fCr; //checking for cycle of similar configurations after applying transition rule everytime 
 	vector<long int> flag(totalIdx,0);
@@ -291,17 +303,23 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 		vector<long int>iCr(tt);
 		long int idR = toDeci(iCr, vertices);
 		if(flag[idR] != 0) continue; 
-	//	cout<<idR<<"->";
+		cout<<idR<<"->";
 		while(verificationOfConfigurationReduced(iCr, fCr,tempRev,vertices)){
+
 			insertDataCayleyTree(tree, iCr);
-			makeiCR(iCr, tree, RULE,flag,vertices);
-		//	cout<<toDeci(iCr, vertices)<<"->";
+			makeiCN4(iCr, tree, RULE,flag,vertices);
+			cout<<toDeci(iCr, vertices)<<"->";
 		}
-		if(idR != *tempRev) {cout<<'\n'<<rule<<" :: non reversible"<<endl;return;}
-	//	cout<<endl;
+//		if(idR != *tempRev) {//cout<<'\n'<<rule<<" :: non reversible"<<endl;
+//			outFile << rule << ":: Non reversible\n"<<endl;
+//		return;}
+	cout<<endl;
 		fCr.clear();
 	}
+//	outFile << rule << " :: reversible\n"<<endl;
 	cout<<'\n'<<rule<<" :: reversible"<<endl;
+//	outFile.close();
+	delete tempRev;
 	return;
 }	
 
@@ -330,17 +348,21 @@ int main()
    // int rr;cout<<"rule for n = 2: ";cin>>rr;
    // CAonCT(CT, arr,rr);
 
-    int* RULE=new int[256];
-//    cin >> rule;
+
+  //  int* RULE=new int[256];
+int rule;
+  cin >> rule;
 	
    // cout << "\nca ct n 4: " << endl;
    // CA_at_n_equals_4(CT, rule, arr);
     // makeTable(T, CT, arr, V);
-	for(int rule = 0;rule<256;rule++){
+/*	for(int rule = 0;rule<256;rule++){
 		CAonCT_reduced_rules(V, rule, CT);
-	}
-
+	}*/
+//	for(int rule = 0;rule < 65535;rule++){
+	CAonCT_reduced_rules(V, rule, CT);
+//}
 	deleteCayleyTree(CT);
-	delete [] RULE;
+//	delete [] RULE;
 
 }
