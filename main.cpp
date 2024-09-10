@@ -27,9 +27,9 @@ void to_binary(vector<long int>&ar,int M){
 		M >>= 1;
 	}
 }
-int toDeci(vector<long int> T,long int v){
-	int val = 0;
-	for(int i = 0; i< v; i++){
+long int toDeci(vector<long int> T,long int v){
+	long int val = 0;
+	for(long int i = 0; i< v; i++){
 		val += pow(2,i) * T[i];
 	}
 	return val;
@@ -327,7 +327,15 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 	return;
 }	
 */
-
+int calLoop(vector<int> t){
+	int count = 1;
+	int n = t.size()-1;
+	for(int j = n-1;j> -1;j--){
+		if (t[j] == t[n]) return count;
+		count++;
+	}
+	return count;
+}
 void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 	int totalIdx = pow(2, vertices); //how much configurations should be there for consideration of transition rule
 	vector<vector<long int>> confs(totalIdx); //original matrix of configurations which contains a empty list which is further updated with its binary values related to each of its index 
@@ -343,33 +351,42 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 	}
 //	vector<int> reversibleRule(totalIdx);//vector for checking if reversiblity of rule occurs :: if at any point of time after iteration any off bit is found to be there in this list then rule is said to be as not reversible
 	long int *tempRev = new long int;
+	vector<int> loopCalc;
 	for(vector<long int> tt: confs){
 		vector<long int>iCr(tt);
-		long int idR = toDeci(iCr, vertices);
-		if(flag[idR] != 0) continue; 
-		cout<<idR<<"->";
+	//	long int idR = toDeci(iCr, vertices);
+		long int *idR = new long int(toDeci(iCr, vertices));
+		if(flag[*idR] != 0) continue; 
+		loopCalc.push_back(*idR);
+		cout<<*idR<<"->";
 	//	int count = 1;
 		while(verificationOfConfigurationReduced(iCr, fCr,tempRev,vertices)){
 
 			insertDataCayleyTree(tree, iCr);
 			makeiCR(iCr, tree, RULE,flag,vertices);
-			int * val = new int(toDeci(iCr, vertices));
+			*idR = toDeci(iCr, vertices);
 		//	cout<<toDeci(iCr, vertices)<<"->";
-			cout<<*val<<"->";
+			loopCalc.push_back(*idR);
+			cout<<*idR<<"->";
 /*			count++;
 			if (count == 2){
 				cout<<endl;
 				cout<<toDeci(iCr, vertices)<< ' ';
 				count = 1;
 			}*/
-			delete val;
+			
+			
 		}
 	/*	if(idR != *tempRev) {
 			//cout<<'\n'<<rule<<" :: non reversible"<<endl;
 			return;
 		}
-	*/	cout<<endl;
+	*/	
+		cout<<"\tloop length: "<<calLoop(loopCalc);
+		cout<<endl;
 		fCr.clear();
+		delete idR;
+		loopCalc.clear();
 	}
 //	cout<<'\n'<<rule<<" :: reversible"<<endl;
 	delete tempRev;
