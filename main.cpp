@@ -262,6 +262,7 @@ void makeiCR(vector<long int> &ic, treeNode *header, vector<long int> rule,vecto
         queue.erase(queue.begin());
     }
 	F[toDeci(ic, V)]=1;
+
 }
 
 //verification if there is any configuration repeating itself
@@ -279,8 +280,11 @@ int verificationOfConfigurationReduced(vector<long int> temp, vector<vector<long
     fC.push_back(temp);//adding dissimilar configuration to the list
     return 1;//no match found
 }
-//reduced means the symmetry is introduced and state transition of self is independent of the position of neighbors 
-void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
+/*
+
+//CHECKING FOR REVERSIBLITY OF CONFIGURATION IN NO SYMMETRIC FORM i.e. NO ROTATION IS DONE ON THE VERTICES 
+
+void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){ 
 	ofstream outFile;
 	outFile.open("output.txt",ios::app);
 	int totalIdx = pow(2, vertices); //how much configurations should be there for consideration of transition rule
@@ -322,8 +326,55 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 	delete tempRev;
 	return;
 }	
+*/
 
+void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
+	int totalIdx = pow(2, vertices); //how much configurations should be there for consideration of transition rule
+	vector<vector<long int>> confs(totalIdx); //original matrix of configurations which contains a empty list which is further updated with its binary values related to each of its index 
+	vector<long int> tempV(vertices,0);
+	vector<long int> RULE(8,0);//rule matrix :: 8-bit binary form of RULE 
+	to_binary(RULE, rule);
+	vector<vector<long int>>fCr; //checking for cycle of similar configurations after applying transition rule everytime 
+	vector<long int> flag(totalIdx,0);
+	for(int i = 0;i<totalIdx;i++){
+		to_binary(tempV, i);
+		confs[i] = tempV; //assigning each index of conf with a totalIdx-bit binary form of its index 
+		fill(tempV.begin(), tempV.end(), 0); //resetting temporary vector again to its default values '0'
+	}
+//	vector<int> reversibleRule(totalIdx);//vector for checking if reversiblity of rule occurs :: if at any point of time after iteration any off bit is found to be there in this list then rule is said to be as not reversible
+	long int *tempRev = new long int;
+	for(vector<long int> tt: confs){
+		vector<long int>iCr(tt);
+		long int idR = toDeci(iCr, vertices);
+		if(flag[idR] != 0) continue; 
+		cout<<idR<<"->";
+	//	int count = 1;
+		while(verificationOfConfigurationReduced(iCr, fCr,tempRev,vertices)){
 
+			insertDataCayleyTree(tree, iCr);
+			makeiCR(iCr, tree, RULE,flag,vertices);
+			int * val = new int(toDeci(iCr, vertices));
+		//	cout<<toDeci(iCr, vertices)<<"->";
+			cout<<*val<<"->";
+/*			count++;
+			if (count == 2){
+				cout<<endl;
+				cout<<toDeci(iCr, vertices)<< ' ';
+				count = 1;
+			}*/
+			delete val;
+		}
+	/*	if(idR != *tempRev) {
+			//cout<<'\n'<<rule<<" :: non reversible"<<endl;
+			return;
+		}
+	*/	cout<<endl;
+		fCr.clear();
+	}
+//	cout<<'\n'<<rule<<" :: reversible"<<endl;
+	delete tempRev;
+	return;
+}	
 
 int main()
 {
