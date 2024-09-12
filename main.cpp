@@ -1,10 +1,11 @@
 #include <iostream>
 #include <cmath>
+#include <climits>
 #include <vector>
-#include <cstdlib>
-#include <ctime>
+//#include <cstdlib>
+//#include <ctime>
 #include "./cayley_tree.h"
-#include <fstream>
+//#include <fstream>
 using namespace std;
 
 // a node structure
@@ -336,7 +337,8 @@ int calLoop(vector<int> t){
 	}
 	return count;
 }
-void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
+void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree,vector<int>&lV){
+	lV[0] = INT_MAX;lV[1] = 0; lV[2] = INT_MIN;
 	int totalIdx = pow(2, vertices); //how much configurations should be there for consideration of transition rule
 	vector<vector<long int>> confs(totalIdx); //original matrix of configurations which contains a empty list which is further updated with its binary values related to each of its index 
 	vector<long int> tempV(vertices,0);
@@ -382,10 +384,19 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 			return;
 		}
 	*/	
-		cout<<"\tloop length: "<<calLoop(loopCalc);
+		int * looplength = new int(calLoop(loopCalc));
+		cout<<"\tloop length: "<<*looplength;
+		if (*looplength < lV[0]) lV[0] = *looplength;
+		if (*looplength > lV[2]) lV[2] = *looplength;
+		(*looplength) = 0;
+		for(int i : loopCalc){
+			(*looplength) += i;	
+		}
+		lV[1] = (*looplength)/totalIdx;
 		cout<<endl;
 		fCr.clear();
 		delete idR;
+		delete looplength;
 		loopCalc.clear();
 	}
 //	cout<<'\n'<<rule<<" :: reversible"<<endl;
@@ -395,42 +406,46 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree){
 
 int main()
 {
-    int order = 2, height;
-    cin >> height;
-    long int V = noOfVertices(height, order);
-    cout << V << endl;
-   // long int arr1[V];
-   // srand(time(nullptr));
-   // for (long int i = 0; i < V; i++)
-    //{
-     //   arr1[i] = rand() & 1;
-   // }
-    //vector<long int> arr(arr1, arr1 + V);
+	int order = 2, height;
+	cin >> height;
+	long int V = noOfVertices(height, order);
+	cout << V << endl;
+	// long int arr1[V];
+	// srand(time(nullptr));
+	// for (long int i = 0; i < V; i++)
+	//{
+	//   arr1[i] = rand() & 1;
+	// }
+	//vector<long int> arr(arr1, arr1 + V);
 
-    treeNode *CT = cayleyTree(height, order, V); // tree formation
-   // insertDataCayleyTree(CT, arr);               // data insertion into tree
-   // cout << "initial config(conf-1):\n";
-  //  printCTArr(CT); // printing of tree in array format
-   // cout << endl;
-   // vector<vector<int>> T(16, vector<int>(3));
-   // int rr;cout<<"rule for n = 2: ";cin>>rr;
-   // CAonCT(CT, arr,rr);
+	treeNode *CT = cayleyTree(height, order, V); // tree formation
+	// insertDataCayleyTree(CT, arr);               // data insertion into tree
+	// cout << "initial config(conf-1):\n";
+	//  printCTArr(CT); // printing of tree in array format
+	// cout << endl;
+	// vector<vector<int>> T(16, vector<int>(3));
+	// int rr;cout<<"rule for n = 2: ";cin>>rr;
+	// CAonCT(CT, arr,rr);
 
 
-  //  int* RULE=new int[256];
-int rule;
-  cin >> rule;
+	//  int* RULE=new int[256];
+	int rule;
+	cin >> rule;
+
+	// cout << "\nca ct n 4: " << endl;
+	// CA_at_n_equals_4(CT, rule, arr);
+	// makeTable(T, CT, arr, V);
+	vector<int> lengthVector(3);
+	cout<<"RULE"<<"\tMIN cl"<<"\tAVG cl"<<"\tMAX cl"<<endl;
+//	for(int rule = 0;rule<256;rule++){
+		CAonCT_reduced_rules(V, rule, CT,lengthVector);
+//		cout<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[1]<<'\t'<<lengthVector[2]<<endl;
+//	}
+	//for(int rule = 0;rule < 65535;rule++){
+		//CAonCT_reduced_rules(V, rule, CT);
+	//}
 	
-   // cout << "\nca ct n 4: " << endl;
-   // CA_at_n_equals_4(CT, rule, arr);
-    // makeTable(T, CT, arr, V);
-/*	for(int rule = 0;rule<256;rule++){
-		CAonCT_reduced_rules(V, rule, CT);
-	}*/
-//	for(int rule = 0;rule < 65535;rule++){
-	CAonCT_reduced_rules(V, rule, CT);
-//}
 	deleteCayleyTree(CT);
-//	delete [] RULE;
+	//	delete [] RULE;
 
 }
