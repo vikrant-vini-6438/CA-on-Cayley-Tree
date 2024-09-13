@@ -5,7 +5,7 @@
 //#include <cstdlib>
 //#include <ctime>
 #include "./cayley_tree.h"
-//#include <fstream>
+#include <fstream>
 using namespace std;
 
 // a node structure
@@ -343,16 +343,23 @@ int main()
 	cin >> height;
 	long int V = noOfVertices(height, order);
 	cout << V << endl;
-
+	ofstream myfile;
+	myfile.open("output.txt", std::ios::trunc);
 	treeNode *CT = cayleyTree(height, order, V); // tree formation
 //	int rule;
 //	cin >> rule;
 
 	vector<int> lengthVector(3);
-	cout<<"RULE"<<"\tMIN cl"<<"\tAVG cl"<<"\tMAX cl"<<endl;
-	for(int rule = 0;rule<256;rule++){
-		CAonCT_reduced_rules(V, rule, CT,lengthVector);
-		cout<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[1]<<'\t'<<lengthVector[2]<<endl;
+	if (!myfile){cerr<<"file not created or did not open successfully";}
+	else{
+		myfile<<"RULE"<<"\tMIN cl"<<"\tMAX cl"<<endl;
+		cout<<"RULE"<<"\tMIN cl"<<"\tMAX cl"<<endl;
+		for(int rule = 0;rule<256;rule++){
+			CAonCT_reduced_rules(V, rule, CT,lengthVector);
+			myfile<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[2]<<'\n';
+			cout<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[2]<<endl;
+		}
 	}
+	myfile.close();
 	deleteCayleyTree(CT);
 }
