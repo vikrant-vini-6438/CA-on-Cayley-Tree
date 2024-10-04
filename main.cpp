@@ -289,38 +289,21 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree,vector<int>
 	int * looplength = new int(0);
 	for(vector<long int> tt: confs){
 		vector<long int>iCr(tt);
-	//	long int idR = toDeci(iCr, vertices);
 		long int *idR = new long int(toDeci(iCr, vertices));
 		if(flag[*idR] != 0) continue; 
 		confsDerived.push_back(*idR);
-		//cout<<*idR<<"->";
-	//	int count = 1;
+		cout<<*idR<<"->";
 		while(verificationOfConfigurationReduced(iCr, fCr,tempRev,vertices)){
 
 			insertDataCayleyTree(tree, iCr);
 			makeiCR(iCr, tree, RULE,flag,vertices);
 			*idR = toDeci(iCr, vertices);
-		//	cout<<toDeci(iCr, vertices)<<"->";
 			confsDerived.push_back(*idR);
-			//cout<<*idR<<"->";
-/*			count++;
-			if (count == 2){
-				cout<<endl;
-				cout<<toDeci(iCr, vertices)<< ' ';
-				count = 1;
-			}*/
-			
-			
+			cout<<*idR<<"->";
 		}
-	/*	if(idR != *tempRev) {
-			//cout<<'\n'<<rule<<" :: non reversible"<<endl;
-			return;
-		}
-	*/	
 		(*looplength) = calLoop(confsDerived);
-		//cout<<"\tloop length: "<<(*looplength);
 		lenConfs.push_back((*looplength));
-		//cout<<endl;
+		cout<<endl;
 		fCr.clear();
 		delete idR;
 		confsDerived.clear();
@@ -340,26 +323,27 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree,vector<int>
 int main()
 {
 	int order = 2, height;
+	cout<<"height: ";
 	cin >> height;
 	long int V = noOfVertices(height, order);
-	cout << V << endl;
+	cout << "total vertices: "<< V << endl;
 	ofstream myfile;
 	myfile.open("output.txt", std::ios::trunc);
 	treeNode *CT = cayleyTree(height, order, V); // tree formation
-//	int rule;
-//	cin >> rule;
+	int rule;
+	cin >> rule;
 
 	vector<int> lengthVector(3);
 	if (!myfile){cerr<<"file not created or did not open successfully";}
 	else{
 		myfile<<"RULE"<<"\tMIN cl"<<"\tMAX cl"<<endl;
 		cout<<"RULE"<<"\tMIN cl"<<"\tMAX cl"<<endl;
-		for(int rule = 0;rule<256;rule++){
+	//	for(int rule = 0;rule<256;rule++){
 			CAonCT_reduced_rules(V, rule, CT,lengthVector);
 			myfile<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[2]<<'\n';
-			cout<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[2]<<endl;
+	//		cout<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[2]<<endl;
 		}
-	}
+	//}
 	myfile.close();
 	deleteCayleyTree(CT);
 }
