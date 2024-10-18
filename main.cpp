@@ -245,14 +245,14 @@ void makeiCR(vector<long int> &ic, treeNode *header, vector<long int> rule,vecto
 }
 
 //verification if there is any configuration repeating itself
-int verificationOfConfigurationReduced(vector<long int> temp, vector<vector<long int>> &fC,long int *tempC,long int n)
+int verificationOfConfigurationReduced(vector<long int> temp, vector<vector<long int>> &fC,long int n)
 {
 					
     int j = fC.size();
     for (long i = 0; i < j; i++)
     {
         if (temp == fC[i]) //comparision with list of already created configurations
-        {	*tempC = toDeci(temp, n);
+        {	
             return 0; //if such repeating configuration is found to be there in the list
         }
     }
@@ -283,40 +283,43 @@ void CAonCT_reduced_rules(long int vertices, int rule,treeNode* tree,vector<int>
 		fill(tempV.begin(), tempV.end(), 0); //resetting temporary vector again to its default values '0'
 	}
 //	vector<int> reversibleRule(totalIdx);//vector for checking if reversiblity of rule occurs :: if at any point of time after iteration any off bit is found to be there in this list then rule is said to be as not reversible
-	long int *tempRev = new long int;
+
 	vector<int> confsDerived;
-	vector<int> lenConfs;
+//	vector<int> lenConfs;
+	int m = 0;
 	int * looplength = new int(0);
 	for(vector<long int> tt: confs){
 		vector<long int>iCr(tt);
 		long int *idR = new long int(toDeci(iCr, vertices));
-		if(flag[*idR] != 0) continue; 
+		if(flag[*idR] != 0) continue;m += 1; 
 		confsDerived.push_back(*idR);
-		cout<<*idR<<"->";
-		while(verificationOfConfigurationReduced(iCr, fCr,tempRev,vertices)){
+//		cout<<*idR<<"->";
+		while(verificationOfConfigurationReduced(iCr, fCr,vertices)){
 
 			insertDataCayleyTree(tree, iCr);
 			makeiCR(iCr, tree, RULE,flag,vertices);
 			*idR = toDeci(iCr, vertices);
 			confsDerived.push_back(*idR);
-			cout<<*idR<<"->";
+//			cout<<*idR<<"->";
 		}
 		(*looplength) = calLoop(confsDerived);
-		lenConfs.push_back((*looplength));
-		cout<<endl;
+		if ((*looplength) < lV[0]) lV[0] = (*looplength);
+		if ((*looplength) > lV[2]) lV[2] = (*looplength);
+//		lenConfs.push_back((*looplength));
+//		cout<<endl;
 		fCr.clear();
 		delete idR;
 		confsDerived.clear();
 	}
-	*looplength = 0;
-	for( int i: lenConfs){
-		if (i < lV[0]) lV[0] = i;
-		if (i > lV[2]) lV[2] = i;
-		(*looplength) += i;	
-	}
-	lV[1] = (*looplength)/(totalIdx);
+//	*looplength = 0;
+//	for( int i: lenConfs){
+//		if (i < lV[0]) lV[0] = i;
+//		if (i > lV[2]) lV[2] = i;
+//		(*looplength) += i;	
+//	}
+//	lV[1] = (*looplength)/(totalIdx);
 	delete looplength;
-	delete tempRev;
+	cout<<"M: "<<m<<' '<<endl;
 	return;
 }	
 
@@ -330,20 +333,20 @@ int main()
 	ofstream myfile;
 	myfile.open("output.txt", std::ios::trunc);
 	treeNode *CT = cayleyTree(height, order, V); // tree formation
-	int rule;
-	cin >> rule;
+//	int rule;
+//	cin >> rule;
 
 	vector<int> lengthVector(3);
 	if (!myfile){cerr<<"file not created or did not open successfully";}
 	else{
 		myfile<<"RULE"<<"\tMIN cl"<<"\tMAX cl"<<endl;
 		cout<<"RULE"<<"\tMIN cl"<<"\tMAX cl"<<endl;
-	//	for(int rule = 0;rule<256;rule++){
+		for(int rule = 0;rule<256;rule++){
 			CAonCT_reduced_rules(V, rule, CT,lengthVector);
 			myfile<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[2]<<'\n';
-	//		cout<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[2]<<endl;
+		cout<<rule<<'\t'<<lengthVector[0]<<'\t'<<lengthVector[2]<<endl;
 		}
-	//}
+	}
 	myfile.close();
 	deleteCayleyTree(CT);
 }
