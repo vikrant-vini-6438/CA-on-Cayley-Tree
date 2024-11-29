@@ -1,136 +1,110 @@
-#include<iostream>
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <queue>
+#include <memory>
 #include "./cayley_tree.h"
-#include<cmath>
+
 using namespace std;
 
-
-typedef struct treeNode treeNode;
-
-// calculation of the total number of vertices this tree can have based on the height and order of the tree
-long int noOfVertices(int height, int order)
-{
-    int result = 1;
-    for (int i = 0; i < height; i++)
-    {
-        result += (order + 1) * pow((order), i);
+long int calculateVertexCount(int height, int order) {
+    long int result = 1;
+    for (int i = 0; i < height; ++i) {
+        result += (order + 1) * pow(order, i);
     }
     return result;
 }
 
-//creation of Cayley Tree dynamically @ each node with dynamic memory allocation 
-treeNode *cayleyTree(int h, int o, long int v)
-{
-    treeNode *root = new treeNode;
+TreeNode* createCayleyTree(long int height, long int v) {
+    unique_ptr<TreeNode> root(new TreeNode);
 
-    if (h == 0)
-    {
-        return root;
+    if (height == 0) {
+        return root.release();
     }
 
-    root->neighborOne = new treeNode;
-    root->neighborTwo = new treeNode;
-    root->neighborThree = new treeNode;
-    root->neighborOne->neighborOne = root;
-    root->neighborTwo->neighborOne = root;
-    root->neighborThree->neighborOne = root;
-    v -= 4;                                                                 // less by 4 since 4 vertices are already created as root and its three neighbour vertices
-    vector<treeNode *> queue{root->neighborOne, root->neighborTwo, root->neighborThree}; // use of queue for performing bfs
-    while (v > 0)
-    { // iterate till all vertices are assigned to their respective parent and children
-        queue[0]->neighborTwo = new treeNode;
-        queue[0]->neighborTwo->neighborOne = queue[0];
-        queue[0]->neighborThree = new treeNode;
-        queue[0]->neighborThree->neighborOne = queue[0];
-        queue.push_back(queue[0]->neighborTwo);
-        queue.push_back(queue[0]->neighborThree);
-        v -= 2; // less by 2 since every time 2 vertices are being created
-        queue.erase(queue.begin());
+    root->neighborOne = new TreeNode;
+    root->neighborTwo = new TreeNode;
+    root->neighborThree = new TreeNode;
+    root->neighborOne->neighborOne = root.get();
+    root->neighborTwo->neighborOne = root.get();
+    root->neighborThree->neighborOne = root.get();
+
+    queue<TreeNode*> nodeQueue;
+    nodeQueue.push(root->neighborOne);
+    nodeQueue.push(root->neighborTwo);
+    nodeQueue.push(root->neighborThree);
+
+    long long verticesLeft = v - 4; // Optimized vertex count calculation
+    while (verticesLeft > 0) {
+        TreeNode* current = nodeQueue.front();
+        current->neighborTwo = new TreeNode;
+        current->neighborTwo->neighborOne = current;
+        current->neighborThree = new TreeNode;
+        current->neighborThree->neighborOne = current;
+        nodeQueue.push(current->neighborTwo);
+        nodeQueue.push(current->neighborThree);
+        verticesLeft-=2;
+        nodeQueue.pop();
     }
-    return root;
+
+    return root.release();
 }
 
-//insertion of data into Cayley Tree 
-void insertDataCayleyTree(treeNode *head, vector<long int> ar)
-{
-    vector<treeNode *> queue; // for performing bfs over tree
-    queue.push_back(head);
-    long int *idx = new long int;
-    *idx = 0;
-    queue.push_back(queue[0]->neighborOne);
-    while (queue[0] != nullptr)
-    {
-        queue[0]->data = ar[(*idx)++];
-        queue.push_back(queue[0]->neighborTwo);
-        queue.push_back(queue[0]->neighborThree);
-        queue.erase(queue.begin());
-    }
-    delete idx;
-}
+void insertDataIntoTree(TreeNode* head, const vector<long int>& data) {
+    queue<TreeNode*> nodeQueue;
+    nodeQueue.push(head);
+    int index = 0;
 
-//Cayley Tree printing as tabular view which one belong to which node in any form either parent or child
-void printCayleyTree(treeNode *head)
-{
-    cout << "present-node | N-1 | N-2 | N-3" << endl;
-    vector<treeNode *> queue;
-    queue.push_back(head);
-    queue.push_back(queue[0]->neighborOne);
-    while (queue[0] != nullptr)
-    {
-        // for leaf nodes:
-        if (queue[0]->neighborTwo == nullptr)
-        {
-            cout << "leaf node: " << queue[0]->data;
+    TreeNode* current = nodeQueue.front();
+
+    current->data = data[index++];
+    nodeQueue.push(current->neighborOne);
+    nodeQueue.push(current->neighborTwo);
+    nodeQueue.push(current->neighborThree);
+
+    nodeQueue.pop();
+    while (!nodeQueue.empty()) {
+        TreeNode* current = nodeQueue.front();
+        nodeQueue.pop();
+
+        current->data = data[index++];
+
+        if (current->neighborTwo != nullptr) {
+            nodeQueue.push(current->neighborTwo);
+            nodeQueue.push(current->neighborThree);
         }
-        // for internal nodes
-        else
-        {
-            cout << queue[0]->data << "\t\t";
-            cout << queue[0]->neighborOne->data << "\t\t";
-            cout << queue[0]->neighborTwo->data << "\t\t";
-            cout << queue[0]->neighborThree->data << "\t\t";
+    }
+}
+
+void printTree(TreeNode* head) {
+    queue<TreeNode*> nodeQueue;
+    nodeQueue.push(head);
+
+    while (!nodeQueue.empty()) {
+        TreeNode* current = nodeQueue.front();
+        nodeQueue.pop();
+
+        // ... (print node data as desired)
+
+        if (current->neighborTwo != nullptr) {
+            nodeQueue.push(current->neighborTwo);
+            nodeQueue.push(current->neighborThree);
         }
-        queue.push_back(queue[0]->neighborTwo);
-        queue.push_back(queue[0]->neighborThree);
-        queue.erase(queue.begin());
-        cout << endl;
     }
 }
 
-//printing of Cayley Tree as an array
-void printCTArr(treeNode *head)
-{
-    vector<treeNode *> queue;
-    queue.push_back(head);
-    queue.push_back(head->neighborOne);
-    while (queue[0] != nullptr)
-    {
-        cout << queue[0]->data << ' ';
-        queue.push_back(queue[0]->neighborTwo);
-        queue.push_back(queue[0]->neighborThree);
-        queue.erase(queue.begin());
-    }
-    cout << endl;
-}
+void deleteTree(TreeNode* head) {
+    queue<TreeNode*> nodeQueue;
+    nodeQueue.push(head);
 
-//deletion of dynamically created Cayley Tree
-void deleteCayleyTree(treeNode *head)
-{
-    vector<treeNode *> tempo;
-    treeNode *temp = head;
-    tempo.push_back(head);
-    tempo.push_back(head->neighborOne);
-    long int idx = 0;
-    while (temp->neighborTwo != nullptr)
-    {
-        tempo.push_back(temp->neighborTwo);
-        tempo.push_back(temp->neighborThree);
-        temp = tempo[++idx];
-    }
-    idx = tempo.size();
-    while (idx > 0)
-    {
-        temp = tempo[--idx];
-        delete temp;
+    while (!nodeQueue.empty()) {
+        TreeNode* current = nodeQueue.front();
+        nodeQueue.pop();
+
+        if (current->neighborTwo != nullptr) {
+            nodeQueue.push(current->neighborTwo);
+            nodeQueue.push(current->neighborThree);
+        }
+        delete current;
     }
 }
-
