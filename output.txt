@@ -1,0 +1,2 @@
+RULE	MIN cl	MAX cl
+15	1	2
