@@ -10,8 +10,9 @@
 #include "cayley_tree.h"
 using namespace std;
 
+
+
 void to_binary(vector<long int>& ar, long int M) {
-    fill(ar.begin(), ar.end(), 0);
     int idx = 0;
     while (M && idx < ar.size()) {
         ar[idx++] = (M & 1);
@@ -29,36 +30,37 @@ long int toDeci(const vector<long int>& T, long int v) {
 
 int idxR(int self, const vector<TreeNode*>& neighbors, long int order) {
     int count = 0;
-    for (long int i = 0; i < neighbors.size(); i++) {
-        if (neighbors[i] && neighbors[i]->data == 1) { // Null check
+    for (long int i = 1; i < neighbors.size(); ++i) {
+        if (neighbors[i] &&  neighbors[i]->data == 1) {
             count++;
         }
     }
     vector<long int> temp(2, 0);
     to_binary(temp, count % 4);
-    /*cout<<endl;
-    for(long int i:temp) cout<<i;
-    cout<<endl;*/
-    //return (temp[0] * 1 + self * 2 + temp[1] * 4) % 8;
-    return (4*temp[1] + self*2 + 1*temp[0]) % 8;//LsR
+    return (temp[0] * 1 + self * 2 + temp[1] * 4) % 8;
 }
 
-void CA(vector<long int>& ic, TreeNode* header, const vector<long int>& rule, const long int V, long int order) {
-    ic.clear();
-    ic.resize(V);
-    fill(ic.begin(), ic.end(), 0);
-    int idx = 0;
+void CA(vector<long int>& ic, TreeNode* header, const vector<long int>& rule, long int V, long int order,const long int vert) {
+   ic.clear(); 
+   ic.resize(vert);
+   fill(ic.begin(), ic.end(), 0);
+   int idx  = 0;
     queue<TreeNode*> nodeQueue;
-    nodeQueue.push(header);
-    if (header->neighbors[0]) {
-	    nodeQueue.push(header->neighbors[0]);
+    //ic.push_back(rule[idxR(header->data, header->neighbors, order)]);
+    ic[idx++] = rule[idxR(header->data, header->neighbors, order)];
+
+    for (long int i = 1; i < header->neighbors.size(); ++i) {
+        if (header->neighbors[i]) {
+            nodeQueue.push(header->neighbors[i]);
+        }
     }
+
     while (!nodeQueue.empty()) {
         TreeNode* current = nodeQueue.front();
         nodeQueue.pop();
-        if (idx < V) {
-            ic[idx++] = rule[idxR(current->data, current->neighbors, order)];
-        }
+
+        //ic.push_back(rule[idxR(current->data, current->neighbors, order)]);
+	ic[idx++] = rule[idxR(current->data, current->neighbors, order)];
         for (long int i = 1; i < current->neighbors.size(); ++i) {
             if (current->neighbors[i]) {
                 nodeQueue.push(current->neighbors[i]);
@@ -68,42 +70,35 @@ void CA(vector<long int>& ic, TreeNode* header, const vector<long int>& rule, co
 }
 
 int cycleCheck(const long int vertices, const int rule, TreeNode* tree, const long int order) {
-    long int i = 0,res, loopCount = 0;
+    long int i = 0, loopCount = 0;
     vector<long int> RULE(8, 0);
     to_binary(RULE, rule % 256);
-    long long totalIdx = (vertices <= 63) ? (1LL << vertices) : 0;
+    long long totalIdx = pow(2, vertices);
     vector<long int> flag(totalIdx, 0);
     vector<long int> nextConf(vertices, 0);
     vector<long int> data(vertices, 0);
     while (i < totalIdx) {
 	    
-	    cout<<"\nloop count: "<<loopCount<<endl;
         if (flag[i] == 1) {
             i++;
             continue;
         } else {
-	    flag[i] = 1;	
-            to_binary(data, i);
-            int max_iterations = 100000;
-            int iter = 0;
+		to_binary(nextConf, i);
             while (1) {
-                if (iter++ >= max_iterations) break;
-                //flag[i] = 1;
-                insertDataIntoTree(tree, data);
-		printTree(tree);
-                CA(nextConf, tree, RULE, vertices, order);
-                res = toDeci(nextConf, vertices);
-                if (flag[res] == 1) {
+
+                flag[i] = 1;
+                insertDataIntoTree(tree, nextConf);
+                CA(nextConf, tree, RULE, vertices, order,vertices);
+		i = toDeci(nextConf, vertices);
+		
+                if (flag[i] == 1) {
                     break;
                 }
-		flag[res] = 1;
-                data = nextConf;
-                //fill(nextConf.begin(), nextConf.end(), 0);
+                //data = nextConf;
+		fill(nextConf.begin(), nextConf.end(), 0);
             }
         }
-	cout<<endl;
-        i = 0;
-        loopCount++;
+        i = 0;loopCount++;
     }
     return loopCount;
 }

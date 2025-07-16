@@ -8,43 +8,48 @@
 using namespace std;
 
 long int calculateVertexCount(int height, int order) {
-    long int result = 1;
+    long int result = 1; // Root node
     for (int i = 0; i < height; ++i) {
         result += (order + 1) * pow(order, i);
     }
     return result;
 }
 
-TreeNode* createCayleyTree(long int height, long int v) {
+TreeNode* createCayleyTree(long int height, long int order, long int v) {
     unique_ptr<TreeNode> root(new TreeNode);
+    root->neighbors.resize(order + 1, nullptr); // Root has order + 1 neighbors
 
     if (height == 0) {
         return root.release();
     }
 
-    root->neighborOne = new TreeNode;
-    root->neighborTwo = new TreeNode;
-    root->neighborThree = new TreeNode;
-    root->neighborOne->neighborOne = root.get();
-    root->neighborTwo->neighborOne = root.get();
-    root->neighborThree->neighborOne = root.get();
+    // Initialize neighbors of the root
+    for (long int i = 0; i < order + 1; ++i) {
+        root->neighbors[i] = new TreeNode;
+        root->neighbors[i]->neighbors.resize(order + 1, nullptr);
+        root->neighbors[i]->neighbors[0] = root.get(); // Connect back to parent
+    }
 
     queue<TreeNode*> nodeQueue;
-    nodeQueue.push(root->neighborOne);
-    nodeQueue.push(root->neighborTwo);
-    nodeQueue.push(root->neighborThree);
+    for (long int i = 0; i < order + 1; ++i) {
+        nodeQueue.push(root->neighbors[i]);
+    }
 
-    long long verticesLeft = v - 4; // Optimized vertex count calculation
-    while (verticesLeft > 0) {
+    long long verticesLeft = v - (order + 2); // Root + its neighbors
+    while (verticesLeft > 0 && !nodeQueue.empty()) {
         TreeNode* current = nodeQueue.front();
-        current->neighborTwo = new TreeNode;
-        current->neighborTwo->neighborOne = current;
-        current->neighborThree = new TreeNode;
-        current->neighborThree->neighborOne = current;
-        nodeQueue.push(current->neighborTwo);
-        nodeQueue.push(current->neighborThree);
-        verticesLeft-=2;
         nodeQueue.pop();
+
+        // Add neighbors (except the parent link)
+        for (long int i = 1; i < order + 1 && verticesLeft > 0; ++i) {
+            if (current->neighbors[i] == nullptr) {
+                current->neighbors[i] = new TreeNode;
+                current->neighbors[i]->neighbors.resize(order + 1, nullptr);
+                current->neighbors[i]->neighbors[0] = current; // Connect back to parent
+                nodeQueue.push(current->neighbors[i]);
+                verticesLeft--;
+            }
+        }
     }
 
     return root.release();
@@ -53,25 +58,20 @@ TreeNode* createCayleyTree(long int height, long int v) {
 void insertDataIntoTree(TreeNode* head, const vector<long int>& data) {
     queue<TreeNode*> nodeQueue;
     nodeQueue.push(head);
-    int index = 0;
-
-    TreeNode* current = nodeQueue.front();
-
-    current->data = data[index++];
-    nodeQueue.push(current->neighborOne);
-    nodeQueue.push(current->neighborTwo);
-    nodeQueue.push(current->neighborThree);
-
-    nodeQueue.pop();
-    while (!nodeQueue.empty()) {
-        TreeNode* current = nodeQueue.front();
+    size_t index = 0;
+    if (head->neighbors[0] != nullptr) {
+	    nodeQueue.push(head->neighbors[0]);
+    }
+    while (!nodeQueue.empty() && index < data.size()) {
+    	TreeNode* current = nodeQueue.front();
         nodeQueue.pop();
-
         current->data = data[index++];
 
-        if (current->neighborTwo != nullptr) {
-            nodeQueue.push(current->neighborTwo);
-            nodeQueue.push(current->neighborThree);
+        // Add non-null neighbors (except parent) to the queue
+        for (size_t i = 1; i < current->neighbors.size(); ++i) {
+            if (current->neighbors[i] != nullptr) {
+                nodeQueue.push(current->neighbors[i]);
+            }
         }
     }
 }
@@ -79,16 +79,27 @@ void insertDataIntoTree(TreeNode* head, const vector<long int>& data) {
 void printTree(TreeNode* head) {
     queue<TreeNode*> nodeQueue;
     nodeQueue.push(head);
+    nodeQueue.push(head->neighbors[0]);
 
     while (!nodeQueue.empty()) {
         TreeNode* current = nodeQueue.front();
         nodeQueue.pop();
 
-        // ... (print node data as desired)
+        cout << "Node data: " << current->data << ", Neighbors: ";
+        for (size_t i = 0; i < current->neighbors.size(); ++i) {
+            if (current->neighbors[i] != nullptr) {
+                cout << current->neighbors[i]->data << " ";
+            } else {
+                cout << "null ";
+            }
+        }
+        cout << endl;
 
-        if (current->neighborTwo != nullptr) {
-            nodeQueue.push(current->neighborTwo);
-            nodeQueue.push(current->neighborThree);
+        // Add non-null neighbors (except parent) to the queue
+        for (size_t i = 1; i < current->neighbors.size(); ++i) {
+            if (current->neighbors[i] != nullptr) {
+                nodeQueue.push(current->neighbors[i]);
+            }
         }
     }
 }
@@ -101,9 +112,11 @@ void deleteTree(TreeNode* head) {
         TreeNode* current = nodeQueue.front();
         nodeQueue.pop();
 
-        if (current->neighborTwo != nullptr) {
-            nodeQueue.push(current->neighborTwo);
-            nodeQueue.push(current->neighborThree);
+        // Add non-null neighbors (except parent) to the queue
+        for (size_t i = 1; i < current->neighbors.size(); ++i) {
+            if (current->neighbors[i] != nullptr) {
+                nodeQueue.push(current->neighbors[i]);
+            }
         }
         delete current;
     }
